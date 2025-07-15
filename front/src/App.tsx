@@ -6,6 +6,7 @@ import './styles/common.css';
 
 function App() {
     return (
+
         <Suspense fallback={<div>Loading...</div>}>
             <RouterProvider router={router} />
         </Suspense>

@@ -1,10 +1,10 @@
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-// import AuthLayout from './components/Auth/AuthLayout';
+import MainLayout from './MainLayout';
 
 const LoginPage = lazy(() => import('./authPages/LoginPage'));
 const RegisterPage = lazy(() => import('./authPages/RegisterPage'));
-
+// const DashboardPage =lazy(() => import('./authPages/DashboardPage'));
 
 export const router = createBrowserRouter([
     {
@@ -19,5 +19,16 @@ export const router = createBrowserRouter([
         path: '/register',
         element: <RegisterPage />,
     },
+    {
+        element: <MainLayout />, // 包含导航栏的布局
+        children: [
+            // {
+            //     path: '/dashboard',
+            //     element: <RegisterPage />,
+            // },
+            
+        ],
+    },
+
 
 ]);
