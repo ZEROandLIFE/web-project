@@ -2,8 +2,8 @@ import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 // import AuthLayout from './components/Auth/AuthLayout';
 
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-// const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const LoginPage = lazy(() => import('./authPages/LoginPage'));
+const RegisterPage = lazy(() => import('./authPages/RegisterPage'));
 
 
 export const router = createBrowserRouter([
@@ -15,9 +15,9 @@ export const router = createBrowserRouter([
         path: '/login',
         element: <LoginPage />,
     },
-    // {
-    //     path: '/register',
-    //     element: <RegisterPage />,
-    // },
+    {
+        path: '/register',
+        element: <RegisterPage />,
+    },
 
 ]);

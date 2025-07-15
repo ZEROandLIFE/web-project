@@ -8,6 +8,9 @@ interface LoginResponse {
         username: string;
     };
 }
+interface RegisterResponse {
+    message: string;
+}
 
 export const login = async (username: string, password: string): Promise<LoginResponse> => {
     try {
@@ -23,16 +26,17 @@ export const login = async (username: string, password: string): Promise<LoginRe
     }
 };
 
-export const register = async (username: string, password: string): Promise<LoginResponse> => {
+export const register = async (formData: FormData): Promise<RegisterResponse> => {
     try {
-        const response = await api.post('/auth/register', { username, password });
+        const response = await api.post('/auth/register', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
         return response.data;
     } catch (error) {
-        let message = '注册失败，用户名可能已被占用';
-        if (axios.isAxiosError(error)) {
-            message = error.response?.data?.message || message;
-        }
-        throw new Error(message);
+        console.error(error);
+        throw new Error('注册失败，用户名可能已被占用');
     }
 };
 
