@@ -1,0 +1,50 @@
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* 确保占满整个视口高度 */
+    width: 100%;       /* 确保宽度占满 */
+    margin: 0;         /* 清除默认边距 */
+    padding: 20px;     /* 保留内边距（避免内容贴边） */
+    box-sizing: border-box; /* 防止 padding 影响宽度计算 */
+    background-color: var(--color-bg);
+}
+
+.auth-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 400px; /* 限制最大宽度 */
+    margin: 0 auto;   /* 额外确保水平居中（虽然 flex 已处理，但双重保障） */
+}
+
+.auth-title {
+    text-align: center;
+    color: var(--color-primary);
+    margin-bottom: 24px;
+    font-size: 24px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 16px;
+    color: var(--color-text-secondary);
+}
+
+.auth-footer a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
