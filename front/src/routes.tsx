@@ -4,8 +4,8 @@ import MainLayout from './MainLayout';
 
 const LoginPage = lazy(() => import('./authPages/LoginPage'));
 const RegisterPage = lazy(() => import('./authPages/RegisterPage'));
-// const DashboardPage =lazy(() => import('./authPages/DashboardPage'));
-
+const DashboardPage =lazy(() => import('./authPages/DashboardPage'));
+const NotFoundPage = lazy(() => import('./head/NotFoundPage'));
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -22,12 +22,16 @@ export const router = createBrowserRouter([
     {
         element: <MainLayout />, // 包含导航栏的布局
         children: [
-            // {
-            //     path: '/dashboard',
-            //     element: <RegisterPage />,
-            // },
-            
+            {
+                path: '/dashboard',
+                element: <DashboardPage />,
+            },
+
         ],
+    },
+    {
+        path: '*',
+        element: <NotFoundPage />,
     },
 
 

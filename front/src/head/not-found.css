@@ -1,0 +1,33 @@
+.not-found-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--color-bg);
+    text-align: center;
+}
+
+.not-found-content {
+    max-width: 500px;
+    padding: 40px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.not-found-content h1 {
+    font-size: 72px;
+    margin: 0;
+    color: var(--color-primary);
+}
+
+.not-found-content h2 {
+    font-size: 24px;
+    margin: 10px 0;
+    color: var(--color-text);
+}
+
+.not-found-content p {
+    color: var(--color-text-secondary);
+    margin-bottom: 20px;
+}

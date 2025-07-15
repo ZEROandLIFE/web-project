@@ -27,6 +27,15 @@ const LoginForm = () => {
         setLoading(true);
         setError('');
 
+
+        // 测试账号直接通过
+        if (formData.username === '1' && formData.password === '1') {
+            localStorage.setItem('token', 'test-token');
+            navigate('/dashboard');
+            return;
+        }
+
+
         try {
             await login(formData.username, formData.password);
             navigate('/');
