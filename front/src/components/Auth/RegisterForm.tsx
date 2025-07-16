@@ -116,7 +116,13 @@ const RegisterForm: React.FC = () => {
                 formDataToSend.append('avatar', formData.avatar);
             }
 
-            await register(formDataToSend);
+            await register(
+                formData.username,
+                formData.password,
+                formData.phone,
+                formData.avatar || undefined, // 确保这里传递的是File对象或undefined
+                formData.address
+            );
             setSuccess('注册成功！即将跳转到登录页面...');
             setTimeout(() => {
                 navigate('/login');

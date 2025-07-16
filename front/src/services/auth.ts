@@ -26,8 +26,21 @@ export const login = async (username: string, password: string): Promise<LoginRe
     }
 };
 
-export const register = async (formData: FormData): Promise<RegisterResponse> => {
+export const register = async (
+    username: string,
+    password: string,
+    phone: string,
+    avatar?: File,
+    address?: string
+): Promise<RegisterResponse> => {
     try {
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('password', password);
+        formData.append('phone', phone);
+        if (avatar) formData.append('avatar', avatar);
+        if (address) formData.append('address', address);
+
         const response = await api.post('/auth/register', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -35,8 +48,15 @@ export const register = async (formData: FormData): Promise<RegisterResponse> =>
         });
         return response.data;
     } catch (error) {
-        console.error(error);
-        throw new Error('注册失败，用户名可能已被占用');
+        console.error('注册错误详情:', error);
+        let message = '注册失败';
+        if (axios.isAxiosError(error)) {
+            message = error.response?.data?.message || message;
+            if (error.response?.status === 409) {
+                message = '用户名或手机号已被注册';
+            }
+        }
+        throw new Error(message);
     }
 };
 
