@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import multer from 'multer';
-
+import 'dotenv/config'; 
+import AuthService from"./services/auth"
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // CORS 配置（允许前端访问）
 app.use(cors({
@@ -28,35 +29,41 @@ app.get('/', (req: Request, res: Response) => {
 // 处理注册 POST 请求
 
 
-app.post("/api/auth/register", upload.single("avatar"), (req, res) => {
+app.post("/api/auth/register", upload.single("avatar"), async (req, res) => {
   try {
-    console.log("请求体（文本字段）:", req.body); // 普通表单字段
-    console.log("上传的文件:", req.file); // 文件信息
-    // res.json({ message: "文件上传成功", file: req.file });
     const { username, password, phone, address } = req.body;
     const avatar = req.file; // 获取上传的文件
-    console.log('注册请求数据:', {
+  
+    const newUser = await AuthService.register({
       username,
       password,
       phone,
       address,
-      avatar: avatar ? avatar.originalname : '未上传',
+      avatar: avatar ? avatar.buffer.toString('base64') : undefined
     });
-    console.log("到这了")
-// 模拟注册成功
+    // 返回
     res.status(201).json({
       message: '注册成功',
       user: {
-        username,
-        phone,
-        address,
-        avatar: avatar ? avatar.originalname : 'default-avatar.png',
-      },
+        id: newUser.id,
+        username: newUser.username,
+        phone: newUser.phone,
+        address: newUser.address,
+        avatar: newUser.avatar || 'default-avatar.png'
+      }
     });
   }
-  catch (error) {
+  catch (error:any) {
   
     console.error('注册错误:', error);
+    // 根据错误类型返回不同的状态码
+    if (error.message === 'Username already exists') {
+      res.status(409).json({ error: '用户名已存在' });
+    } else if (error.message === 'Phone number already exists') {
+      res.status(409).json({ error: '手机号已注册' });
+    } else {
+      res.status(500).json({ error: '注册失败' });
+    }
     res.status(500).json({ error: '注册失败' });
   }
 

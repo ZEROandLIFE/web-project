@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import AuthService from '../services/auth';
 import { UserInput } from '../types/user';
 
-class AuthController {
+class RegisterController {
     async register(req: Request, res: Response) {
         try {
             const { username, password, phone, address } = req.body;
@@ -38,4 +38,4 @@ class AuthController {
     }
 }
 
-export default new AuthController();
+export default new RegisterController();
