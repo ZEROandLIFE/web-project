@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import AuthService from '../services/auth';
-import { UserInput } from '../types/user';
+import RegisterService from '../services/registerService';
+import { UserInput } from '../types/register';
 
 class RegisterController {
     async register(req: Request, res: Response) {
@@ -16,7 +16,7 @@ class RegisterController {
                 avatar: avatar ? avatar.buffer.toString('base64') : undefined
             };
 
-            const user = await AuthService.register(userData);
+            const user = await RegisterService.register(userData);
             
             res.status(201).json({
                 message: '注册成功',

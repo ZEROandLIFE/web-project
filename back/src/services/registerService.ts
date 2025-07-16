@@ -1,8 +1,8 @@
 import UserModel from '../models/user';
 import { hashPassword } from '../utils/bcrypt';
-import { UserInput } from '../types/user';
+import { UserInput } from '../types/register';
 
-class AuthService {
+class RegisterService {
     async register(userData: UserInput) {
         const { username, phone, password } = userData;
         
@@ -29,4 +29,4 @@ class AuthService {
     }
 }
 
-export default new AuthService();
+export default new RegisterService();

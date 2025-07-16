@@ -7,7 +7,8 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const multer_1 = __importDefault(require("multer"));
 require("dotenv/config");
-const auth_1 = __importDefault(require("./services/auth"));
+const registerService_1 = __importDefault(require("./services/registerService"));
+const loginService_1 = __importDefault(require("./services/loginService"));
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
 // CORS 配置（允许前端访问）
@@ -31,7 +32,7 @@ app.post("/api/auth/register", upload.single("avatar"), async (req, res) => {
     try {
         const { username, password, phone, address } = req.body;
         const avatar = req.file; // 获取上传的文件
-        const newUser = await auth_1.default.register({
+        const newUser = await registerService_1.default.register({
             username,
             password,
             phone,
@@ -63,6 +64,30 @@ app.post("/api/auth/register", upload.single("avatar"), async (req, res) => {
             res.status(500).json({ error: '注册失败' });
         }
         res.status(500).json({ error: '注册失败' });
+    }
+});
+app.post("/api/auth/login", async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const loginResult = await loginService_1.default.login({ username, password });
+        res.json({
+            token: loginResult.token,
+            user: {
+                id: loginResult.user.id,
+                username: loginResult.user.username,
+                phone: loginResult.user.phone,
+                avatar: loginResult.user.avatar || 'default-avatar.png'
+            }
+        });
+    }
+    catch (error) {
+        console.error('登录错误:', error);
+        if (error.message === '用户不存在' || error.message === '密码错误') {
+            res.status(401).json({ error: error.message });
+        }
+        else {
+            res.status(500).json({ error: '登录失败' });
+        }
     }
 });
 app.listen(port, () => {

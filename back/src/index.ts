@@ -2,7 +2,8 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import 'dotenv/config'; 
-import AuthService from"./services/auth"
+import RegisterService from "./services/registerService"
+import LoginService from"./services/loginService"
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -34,7 +35,7 @@ app.post("/api/auth/register", upload.single("avatar"), async (req, res) => {
     const { username, password, phone, address } = req.body;
     const avatar = req.file; // 获取上传的文件
   
-    const newUser = await AuthService.register({
+    const newUser = await RegisterService.register({
       username,
       password,
       phone,
@@ -68,8 +69,30 @@ app.post("/api/auth/register", upload.single("avatar"), async (req, res) => {
   }
 
 });
+app.post("/api/auth/login", async (req: Request, res: Response) => {
+  try {
+  const { username, password } = req.body;
+  const loginResult = await LoginService.login({ username, password });
+  res.json({
+      token: loginResult.token,
+      user: {
+        id: loginResult.user.id,
+        username: loginResult.user.username,
+        phone: loginResult.user.phone,
+        avatar: loginResult.user.avatar || 'default-avatar.png'
+      }
+    });
+  } catch (error: any) {
+    console.error('登录错误:', error);
+    if (error.message === '用户不存在' || error.message === '密码错误') {
+      res.status(401).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: '登录失败' });
+    }
+  }
 
 
+});
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

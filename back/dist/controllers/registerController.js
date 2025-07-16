@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const auth_1 = __importDefault(require("../services/auth"));
+const registerService_1 = __importDefault(require("../services/registerService"));
 class RegisterController {
     async register(req, res) {
         try {
@@ -16,7 +16,7 @@ class RegisterController {
                 address,
                 avatar: avatar ? avatar.buffer.toString('base64') : undefined
             };
-            const user = await auth_1.default.register(userData);
+            const user = await registerService_1.default.register(userData);
             res.status(201).json({
                 message: '注册成功',
                 user: {

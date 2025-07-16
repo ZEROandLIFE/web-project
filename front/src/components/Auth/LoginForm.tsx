@@ -38,7 +38,7 @@ const LoginForm = () => {
 
         try {
             await login(formData.username, formData.password);
-            navigate('/');
+            navigate('/dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : '登录失败');
         } finally {

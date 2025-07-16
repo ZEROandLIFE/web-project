@@ -1,5 +1,5 @@
 import pool from '../config/database';
-import { User, UserInput } from '../types/user';
+import { User, UserInput } from '../types/register';
 
 class UserModel {
     async createUser(userData: UserInput): Promise<User> {
