@@ -10,5 +10,6 @@ const error_1 = require("./middleware/error");
 const app = (0, express_1.default)();
 app.options('*', (0, cors_1.default)());
 app.use('/api/auth', router_1.default);
+app.use('/api', router_1.default);
 app.use(error_1.notFound);
 app.use(error_1.errorHandler);

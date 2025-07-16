@@ -8,19 +8,26 @@ class LoginController {
     async login(req, res) {
         try {
             const { username, password } = req.body;
-            const loginData = { username, password };
-            const result = await loginService_1.default.login(loginData);
-            res.json(result);
+            const loginResult = await loginService_1.default.login({ username, password });
+            // 确保返回的token包含用户ID
+            res.json({
+                token: loginResult.token,
+                user: {
+                    id: loginResult.user.id,
+                    username: loginResult.user.username,
+                    phone: loginResult.user.phone,
+                    avatar: loginResult.user.avatar || 'default-avatar.png'
+                }
+            });
         }
         catch (error) {
             console.error('登录错误:', error);
-            let message = '登录失败';
-            let status = 500;
             if (error.message === '用户不存在' || error.message === '密码错误') {
-                message = error.message;
-                status = 401;
+                res.status(401).json({ error: error.message });
             }
-            res.status(status).json({ error: message });
+            else {
+                res.status(500).json({ error: '登录失败' });
+            }
         }
     }
 }

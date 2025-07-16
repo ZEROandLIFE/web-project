@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Alert from '../common/Alert';
-import { login } from '../../services/auth';
+import { login } from '../../services/beforeLogin.ts';
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({

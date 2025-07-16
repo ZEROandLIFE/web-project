@@ -9,6 +9,8 @@ const multer_1 = __importDefault(require("multer"));
 require("dotenv/config");
 const registerService_1 = __importDefault(require("./services/registerService"));
 const loginService_1 = __importDefault(require("./services/loginService"));
+const userController_1 = require("./controllers/userController");
+const auth_1 = require("./middleware/auth");
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
 // CORS 配置（允许前端访问）
@@ -27,6 +29,7 @@ const upload = (0, multer_1.default)();
 app.get('/', (req, res) => {
     res.send('Hello, TypeScript Backend!');
 });
+app.get('/api/current', auth_1.authenticate, userController_1.getCurrentUser);
 // 处理注册 POST 请求
 app.post("/api/auth/register", upload.single("avatar"), async (req, res) => {
     try {

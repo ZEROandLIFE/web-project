@@ -7,6 +7,7 @@ const app = express();
 
 app.options('*', cors());
 app.use('/api/auth', authRouter);
+app.use('/api', authRouter);
 app.use(notFound);
 app.use(errorHandler);
 

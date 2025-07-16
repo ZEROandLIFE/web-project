@@ -2,41 +2,45 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import UserModel from '../models/user';
 
-const JWT_SECRET = process.env.JWT_SECRET || '3f786850e387550fdab836ed7e6dc881de23001b8e6e1b4c3d6e2c1b1a0d8c4f9a7b6c5d4e3f2g1h0i9j8k7l6m5n4o3p2q1r0s9t8u7v6w5x4y3z2';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// 验证用户是否已登录
 export async function authenticate(req: Request, res: Response, next: NextFunction) {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        // 1. 检查 Authorization 头
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        const token = authHeader.split(' ')[1];
         
-        if (!token) {
-            throw new Error('Authentication required');
+        // 2. 验证 JWT 并提取 userId（注意：你的 Token 里是 `userId`，不是 `id`）
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: number }; // 关键修改：使用 `userId` 而不是 `id`
+        
+        if (!decoded?.userId) {
+            return res.status(401).json({ error: 'Invalid token: missing userId' });
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
-        const user = await UserModel.getUserById(decoded.id);
-
+        // 3. 查询用户信息
+        const user = await UserModel.getUserById(decoded.userId); // 使用 `userId` 而不是 `id`
         if (!user) {
-            throw new Error('User not found');
+            return res.status(404).json({ error: 'User not found' });
         }
 
-        // 将用户信息添加到请求对象中
+        // 4. 附加用户信息到请求对象
         (req as any).user = user;
         next();
     } catch (error) {
-        res.status(401).json({ error: 'Please authenticate' });
-    }
-}
-
-// 验证用户角色 (如果需要)
-export function authorize(roles: string[]) {
-    return (req: Request, res: Response, next: NextFunction) => {
-        const user = (req as any).user;
+        console.error('Authentication error:', error);
         
-        if (!user || !roles.includes(user.role)) {
-            return res.status(403).json({ error: 'Unauthorized' });
+        // 5. 更精细的错误处理
+        if (error instanceof jwt.JsonWebTokenError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+        if (error instanceof jwt.TokenExpiredError) {
+            return res.status(401).json({ error: 'Token expired' });
         }
         
-        next();
-    };
+        return res.status(500).json({ error: 'Authentication failed' });
+    }
 }

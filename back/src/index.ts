@@ -3,7 +3,9 @@ import cors from 'cors';
 import multer from 'multer';
 import 'dotenv/config'; 
 import RegisterService from "./services/registerService"
-import LoginService from"./services/loginService"
+import LoginService from "./services/loginService"
+import { getCurrentUser } from './controllers/userController';
+import { authenticate } from './middleware/auth';
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -27,9 +29,9 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Hello, TypeScript Backend!');
 });
 
+app.get('/api/current', authenticate, getCurrentUser);
+
 // 处理注册 POST 请求
-
-
 app.post("/api/auth/register", upload.single("avatar"), async (req, res) => {
   try {
     const { username, password, phone, address } = req.body;

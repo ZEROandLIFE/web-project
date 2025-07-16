@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Alert from '../common/Alert';
-import { register } from '../../services/auth';
+import { register } from '../../services/beforeLogin.ts';
 
 interface FormData {
     username: string;
