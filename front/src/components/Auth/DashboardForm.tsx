@@ -6,7 +6,7 @@ import Alert from '../common/Alert';
 import Modal from '../common/Modal';
 import Textarea from '../common/Textarea';
 import '../../authPages/Dashboard.css';
-import { fetchCurrentUser, getBalance, rechargeMoney } from '../../services/api';
+import { fetchCurrentUser, getBalance, rechargeMoney,updateProfile,changePassword } from '../../services/api';
 
 interface UserData {
     username: string;
@@ -104,16 +104,62 @@ const DashboardForm: React.FC = () => {
         }
     };
 
-    const handleUpdateProfile = () => {
-        // 待实现
-        setAlert({ type: 'info', message: '个人信息更新功能待实现' });
-        setShowProfileModal(false);
+    const handleUpdateProfile = async () => {
+        try {
+            const result = await updateProfile({
+                username: newProfile.username || undefined,
+                address: newProfile.address || undefined
+            });
+
+            if (result.success) {
+                setUserData({
+                    ...userData!,
+                    username: result.user.username,
+                    address: result.user.address
+                });
+                setAlert({ type: 'success', message: '个人信息更新成功' });
+                setShowProfileModal(false);
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setAlert({ type: 'error', message: error.message });
+            } else {
+                setAlert({ type: 'error', message: 'An unknown error occurred' });
+            }
+        }
     };
 
-    const handleUpdatePassword = () => {
-        // 待实现
-        setAlert({ type: 'info', message: '密码修改功能待实现' });
-        setShowPasswordModal(false);
+    const handleUpdatePassword = async () => {
+        try {
+            if (newPassword.password !== newPassword.confirmPassword) {
+                setAlert({ type: 'error', message: '两次输入的密码不一致' });
+                return;
+            }
+
+            const result = await changePassword({
+                newPassword: newPassword.password,
+                confirmPassword: newPassword.confirmPassword
+            });
+
+            if (result.success) {
+                setAlert({ type: 'success', message: result.message });
+                setShowPasswordModal(false);
+
+                // 可以在这里添加跳转到登录页的逻辑
+                setTimeout(() => {
+                    setAlert(null);
+                    localStorage.removeItem('token');
+                    navigate('/login'); // 确保 navigate 已正确导入
+                }, 2000);
+                
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setAlert({ type: 'error', message: error.message });
+            } else {
+                setAlert({ type: 'error', message: 'An unknown error occurred' });
+            }
+        }
     };
 
     if (loading) {

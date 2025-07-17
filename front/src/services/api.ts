@@ -20,7 +20,7 @@ api.interceptors.response.use(
     error => {
         if (error.response?.status === 401) {
             localStorage.removeItem('token');
-            window.location.href = '/login';
+            // window.location.href = '/login';
         }
         return Promise.reject(error);
     }
@@ -53,6 +53,31 @@ export const getBalance = async (): Promise<{ balance: number }> => {
         return response.data;
     } catch (error) {
         console.error('获取余额失败:', error);
+        throw error;
+    }
+};
+export const updateProfile = async (profileData: {
+    username?: string;
+    address?: string;
+}): Promise<{ success: boolean; user: any }> => {
+    try {
+        const response = await api.put('/auth/profile', profileData);
+        return response.data;
+    } catch (error) {
+        console.error('更新个人信息失败:', error);
+        throw error;
+    }
+};
+
+export const changePassword = async (passwords: {
+    newPassword: string;
+    confirmPassword: string;
+}): Promise<{ success: boolean; message: string }> => {
+    try {
+        const response = await api.put('/auth/password', passwords);
+        return response.data;
+    } catch (error) {
+        console.error('修改密码失败:', error);
         throw error;
     }
 };

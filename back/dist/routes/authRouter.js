@@ -20,4 +20,8 @@ router.get('/current', auth_1.authenticate, userController_1.getCurrentUser);
 // 用户余额相关路由
 router.post('/recharge', auth_1.authenticate, userController_2.rechargeMoney);
 router.get('/balance', auth_1.authenticate, userController_2.getBalance);
+// 更新个人信息
+router.put('/profile', auth_1.authenticate, userController_2.updateProfile);
+// 修改密码
+router.put('/password', auth_1.authenticate, userController_2.changePassword);
 exports.default = router;

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBalance = exports.rechargeMoney = exports.getCurrentUser = void 0;
+exports.changePassword = exports.updateProfile = exports.getBalance = exports.rechargeMoney = exports.getCurrentUser = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const userService_1 = __importDefault(require("../services/userService"));
 const getCurrentUser = async (req, res) => {
@@ -57,3 +57,53 @@ const getBalance = async (req, res) => {
     }
 };
 exports.getBalance = getBalance;
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { username, address } = req.body;
+        // 验证输入
+        if (!username && !address) {
+            return res.status(400).json({ error: '至少提供一个更新字段' });
+        }
+        const updatedUser = await userService_1.default.updateProfile(userId, { username, address });
+        // 排除密码字段
+        const { password, ...userWithoutPassword } = updatedUser;
+        res.json({
+            success: true,
+            user: userWithoutPassword
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+exports.updateProfile = updateProfile;
+const changePassword = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { newPassword, confirmPassword } = req.body;
+        // 验证输入
+        if (!newPassword || !confirmPassword) {
+            return res.status(400).json({ error: '请提供新密码和确认密码' });
+        }
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ error: '两次输入的密码不一致' });
+        }
+        console.log(1);
+        await userService_1.default.changePassword(userId, newPassword);
+        res.json({
+            success: true,
+            message: '密码已修改，请重新登录'
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+exports.changePassword = changePassword;

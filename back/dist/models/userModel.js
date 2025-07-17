@@ -29,5 +29,27 @@ class UserModel {
     async updateMoney(userId, amount) {
         await database_1.default.execute('UPDATE users SET money = money + ? WHERE id = ?', [amount, userId]);
     }
+    async updateProfile(userId, profileData) {
+        const updates = [];
+        const params = [];
+        if (profileData.username !== undefined) {
+            updates.push('username = ?');
+            params.push(profileData.username);
+        }
+        if (profileData.address !== undefined) {
+            updates.push('address = ?');
+            params.push(profileData.address);
+        }
+        if (updates.length === 0) {
+            throw new Error('没有可更新的字段');
+        }
+        params.push(userId);
+        await database_1.default.execute(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, params);
+    }
+    async changePassword(userId, newPassword) {
+        console.log(3);
+        await database_1.default.execute('UPDATE users SET password = ? WHERE id = ?', [newPassword, userId]);
+        console.log(4);
+    }
 }
 exports.default = new UserModel();

@@ -1,6 +1,6 @@
-// services/userService.ts
 import UserModel from '../models/userModel';
 import { User } from '../types/register';
+import { hashPassword } from '../utils/bcrypt';
 
 class UserService {
     // 获取用户余额
@@ -44,6 +44,31 @@ class UserService {
         const updatedUser = await UserModel.getUserById(userId);
         return updatedUser.money;
     }
+    async updateProfile(userId: number, profileData: {
+    username?: string;
+    address?: string;
+}): Promise<User> {
+    // 验证用户名是否已存在
+    if (profileData.username) {
+        const existingUser = await UserModel.getUserByUsername(profileData.username);
+        if (existingUser && existingUser.id !== userId) {
+            throw new Error('用户名已存在');
+        }
+    }
+
+    // 更新用户信息
+    await UserModel.updateProfile(userId, profileData);
+    
+    // 返回更新后的用户信息
+    return UserModel.getUserById(userId);
+}
+
+// 修改密码
+async changePassword(userId: number, newPassword: string): Promise<void> {
+    console.log(2)
+    const hashedPassword = await hashPassword(newPassword);
+    await UserModel.changePassword(userId, hashedPassword);
+}
 }
 
 export default new UserService();

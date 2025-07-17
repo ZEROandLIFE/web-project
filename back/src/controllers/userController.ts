@@ -52,3 +52,55 @@ export const getBalance = async (req: Request, res: Response) => {
         res.status(400).json({ error: error.message });
     }
 };
+export const updateProfile = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.id;
+        const { username, address } = req.body;
+
+        // 验证输入
+        if (!username && !address) {
+            return res.status(400).json({ error: '至少提供一个更新字段' });
+        }
+
+        const updatedUser = await UserService.updateProfile(userId, { username, address });
+        
+        // 排除密码字段
+        const { password, ...userWithoutPassword } = updatedUser;
+        res.json({
+            success: true,
+            user: userWithoutPassword
+        });
+    } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.id;
+        const { newPassword, confirmPassword } = req.body;
+
+        // 验证输入
+        if (!newPassword || !confirmPassword) {
+            return res.status(400).json({ error: '请提供新密码和确认密码' });
+        }
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ error: '两次输入的密码不一致' });
+        }
+        console.log(1)
+        await UserService.changePassword(userId, newPassword);
+        
+        res.json({
+            success: true,
+            message: '密码已修改，请重新登录'
+        });
+    } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            error: error.message
+        });
+    }
+};

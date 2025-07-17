@@ -3,7 +3,7 @@ import RegisterController from '../controllers/registerController';
 import LoginController from '../controllers/loginController';
 import { getCurrentUser } from '../controllers/userController';
 import { authenticate } from '../middleware/auth'
-import { rechargeMoney, getBalance } from '../controllers/userController';
+import { rechargeMoney, getBalance,updateProfile,changePassword } from '../controllers/userController';
 import multer from 'multer';
 
 const upload = multer(); // 内存存储，用于处理文件上传
@@ -19,4 +19,8 @@ router.get('/current', authenticate, getCurrentUser);
 // 用户余额相关路由
 router.post('/recharge', authenticate, rechargeMoney);
 router.get('/balance', authenticate, getBalance);
+// 更新个人信息
+router.put('/profile', authenticate, updateProfile);
+// 修改密码
+router.put('/password', authenticate, changePassword);
 export default router;
