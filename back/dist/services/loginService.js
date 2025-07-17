@@ -3,14 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const user_1 = __importDefault(require("../models/user"));
+const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = require("../utils/bcrypt");
 const jwt_1 = require("../utils/jwt");
 class LoginService {
     async login(loginData) {
         const { username, password } = loginData;
         // 1. 检查用户是否存在
-        const user = await user_1.default.getUserByUsername(username);
+        const user = await userModel_1.default.getUserByUsername(username);
         if (!user) {
             throw new Error('用户不存在');
         }

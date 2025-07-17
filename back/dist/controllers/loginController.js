@@ -9,7 +9,6 @@ class LoginController {
         try {
             const { username, password } = req.body;
             const loginResult = await loginService_1.default.login({ username, password });
-            // 确保返回的token包含用户ID
             res.json({
                 token: loginResult.token,
                 user: {

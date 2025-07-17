@@ -4,13 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCurrentUser = void 0;
-const user_1 = __importDefault(require("../models/user"));
+const userModel_1 = __importDefault(require("../models/userModel"));
 const getCurrentUser = async (req, res) => {
     try {
         // 从认证中间件附加的用户信息中获取ID
         const userId = req.user.id;
         // 查询用户信息
-        const user = await user_1.default.getUserById(userId);
+        const user = await userModel_1.default.getUserById(userId);
         if (!user) {
             return res.status(404).json({ error: '用户不存在' });
         }

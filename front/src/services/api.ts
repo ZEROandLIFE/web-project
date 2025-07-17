@@ -31,7 +31,7 @@ api.interceptors.response.use(
 export const fetchCurrentUser = async () => {
     try {
 
-        const response = await api.get('/current');
+        const response = await api.get('/auth/current');
         return response.data;
     } catch (error) {
         console.error('获取用户信息失败:', error);

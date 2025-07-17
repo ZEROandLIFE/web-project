@@ -1,4 +1,4 @@
-import UserModel from '../models/user';
+import UserModel from '../models/userModel';
 import { comparePassword } from '../utils/bcrypt';
 import { generateToken } from '../utils/jwt';
 import { LoginInput, LoginResponse } from '../types/login';

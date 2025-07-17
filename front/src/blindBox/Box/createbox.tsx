@@ -14,7 +14,7 @@ const CreateBox: React.FC = () => {
         boxName: string;
         boxDescription: string;
         boxNum: number;
-        boxAvatar: string;
+        boxAvatar?: string;
         price: number;
         userId: string;
         items: { name: string; quantity: number }[];

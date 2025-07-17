@@ -1,4 +1,4 @@
-import UserModel from '../models/user';
+import UserModel from '../models/userModel';
 import { hashPassword } from '../utils/bcrypt';
 import { UserInput } from '../types/register';
 

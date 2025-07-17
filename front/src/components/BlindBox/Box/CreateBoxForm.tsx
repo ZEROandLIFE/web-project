@@ -18,7 +18,7 @@ interface CreateBoxFormProps {
         boxName: string;
         boxDescription: string;
         boxNum: number;
-        boxAvatar: string;
+        boxAvatar?: string;
         price: number;
         userId: string;
         items: BoxItem[];
@@ -106,6 +106,15 @@ const CreateBoxForm: React.FC<CreateBoxFormProps> = ({ onSubmit }) => {
             setError('无法获取用户信息，请重新登录');
             return;
         }
+        console.log('提交的数据:', {
+            boxName,
+            boxDescription,
+            boxNum,
+            boxAvatar,
+            price,
+            userId,
+            items
+        });
 
         onSubmit({
             boxName,

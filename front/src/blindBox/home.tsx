@@ -1,52 +1,33 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import HomeForm from '../components/BlindBox/HomeForm.tsx';
+import { getAllBoxes } from '.././services/box';
+import type { Box } from '.././services/box.ts';
 import './home.css';
 
-interface BlindBox {
-    id: string;
-    name: string;
-    imageUrl: string;
-    remaining: number;
-}
-
 const Home: React.FC = () => {
-    const [blindBoxes, setBlindBoxes] = useState<BlindBox[]>([]);
-    const [filteredBoxes, setFilteredBoxes] = useState<BlindBox[]>([]);
+    const [blindBoxes, setBlindBoxes] = useState<Box[]>([]);
+    const [filteredBoxes, setFilteredBoxes] = useState<Box[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
-        document.title = '盲盒平台';
-        // 模拟数据获取
-        const mockData: BlindBox[] = [
-            {
-                id: '1',
-                name: '神秘海洋盲盒',
-                imageUrl: '/assets/box1.jpg',
-                remaining: 42,
-            },
-            {
-                id: '2',
-                name: '星空系列盲盒',
-                imageUrl: '/assets/box2.jpg',
-                remaining: 15,
-            },
-            {
-                id: '3',
-                name: '动物森林盲盒',
-                imageUrl: '/assets/box3.jpg',
-                remaining: 28,
-            },
-            {
-                id: '4',
-                name: '复古玩具盲盒',
-                imageUrl: '/assets/box4.jpg',
-                remaining: 7,
-            },
-        ];
-
-        setBlindBoxes(mockData);
-        setFilteredBoxes(mockData);
-        setLoading(false);
+        document.title = '盲盒商城';
+        const fetchBoxes = async () => {
+            try {
+                const boxes = await getAllBoxes();
+                console.log(boxes);
+                setBlindBoxes(boxes);
+                setFilteredBoxes(boxes);
+            } catch (err) {
+                console.error('获取盲盒失败:', err);
+                setError('获取盲盒数据失败，请稍后重试');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBoxes();
     }, []);
 
     const handleSearch = (searchTerm: string) => {
@@ -56,13 +37,21 @@ const Home: React.FC = () => {
         }
 
         const filtered = blindBoxes.filter(box =>
-            box.name.toLowerCase().includes(searchTerm.toLowerCase())
+            box.boxName.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setFilteredBoxes(filtered);
     };
 
+    const handleBoxClick = (boxId: string) => {
+        navigate(`/boxdetail/${boxId}`);
+    };
+
     if (loading) {
         return <div className="home-loading">加载中...</div>;
+    }
+
+    if (error) {
+        return <div className="home-error">{error}</div>;
     }
 
     return (
@@ -74,14 +63,29 @@ const Home: React.FC = () => {
             <div className="home-boxes-grid">
                 {filteredBoxes.length > 0 ? (
                     filteredBoxes.map(box => (
-                        <div key={box.id} className="home-box-item">
-                            <img
-                                src={box.imageUrl}
-                                alt={box.name}
-                                className="home-box-image"
-                            />
-                            <h3 className="home-box-name">{box.name}</h3>
-                            <p className="home-box-remaining">剩余: {box.remaining}个</p>
+                        <div
+                            key={box.boxId}
+                            className="home-box-item"
+                            onClick={() => handleBoxClick(box.boxId)}
+                        >
+                            {box.boxAvatar ? (
+                                <img
+                                    src={box.boxAvatar}
+                                    alt={box.boxName}
+                                    className="home-box-image"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '/assets/no-image.png';
+                                        (e.target as HTMLImageElement).alt = '暂无图片';
+                                    }}
+                                />
+                            ) : (
+                                <div className="home-box-no-image">暂无图片</div>
+                            )}
+                            <h3 className="home-box-name">{box.boxName}</h3>
+                            <div className="home-box-info">
+                                <span className="home-box-num">数量: {box.boxNum}</span>
+                                <span className="home-box-price">¥{box.price}</span>
+                            </div>
                         </div>
                     ))
                 ) : (
