@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const database_1 = __importDefault(require("../config/database"));
 class UserModel {
     async createUser(userData) {
-        const { username, password, phone, avatar = 'default-avatar.png', address = '' } = userData;
-        const [result] = await database_1.default.execute('INSERT INTO users (username, password, phone, avatar, address) VALUES (?, ?, ?, ?, ?)', [username, password, phone, avatar, address]);
+        const { username, password, phone, avatar = 'default-avatar.png', address = '', money = 0 } = userData;
+        const [result] = await database_1.default.execute('INSERT INTO users (username, password, phone, avatar, address, money) VALUES (?, ?, ?, ?, ?, ?)', [username, password, phone, avatar, address, money]);
         return this.getUserById(result.insertId);
     }
     async getUserById(id) {
@@ -25,6 +25,9 @@ class UserModel {
     async getUserByPhone(phone) {
         const [rows] = await database_1.default.execute('SELECT * FROM users WHERE phone = ?', [phone]);
         return rows[0] || null;
+    }
+    async updateMoney(userId, amount) {
+        await database_1.default.execute('UPDATE users SET money = money + ? WHERE id = ?', [amount, userId]);
     }
 }
 exports.default = new UserModel();

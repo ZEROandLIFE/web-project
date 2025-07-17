@@ -2,7 +2,8 @@ import express from 'express';
 import RegisterController from '../controllers/registerController';
 import LoginController from '../controllers/loginController';
 import { getCurrentUser } from '../controllers/userController';
-import {authenticate} from'../middleware/auth'
+import { authenticate } from '../middleware/auth'
+import { rechargeMoney, getBalance } from '../controllers/userController';
 import multer from 'multer';
 
 const upload = multer(); // 内存存储，用于处理文件上传
@@ -15,4 +16,7 @@ router.post('/login', LoginController.login);
 
 router.get('/current', authenticate, getCurrentUser);
 
+// 用户余额相关路由
+router.post('/recharge', authenticate, rechargeMoney);
+router.get('/balance', authenticate, getBalance);
 export default router;

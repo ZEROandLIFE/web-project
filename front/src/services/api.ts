@@ -1,4 +1,3 @@
-// api.ts
 import axios from 'axios';
 
 const api = axios.create({
@@ -38,5 +37,23 @@ export const fetchCurrentUser = async () => {
         throw error; // 抛出错误让调用方处理
     }
 };
+export const rechargeMoney = async (amount: number): Promise<{ success: boolean; newBalance: number }> => {
+    try {
+        const response = await api.post('/auth/recharge', { amount });
+        return response.data;
+    } catch (error) {
+        console.error('充值失败:', error);
+        throw error;
+    }
+};
 
+export const getBalance = async (): Promise<{ balance: number }> => {
+    try {
+        const response = await api.get('/auth/balance');
+        return response.data;
+    } catch (error) {
+        console.error('获取余额失败:', error);
+        throw error;
+    }
+};
 export default api;

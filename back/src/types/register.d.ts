@@ -5,6 +5,7 @@ export interface User {
     phone: string;
     avatar?: string;
     address?: string;
+    money: number;
     created_at: Date;
     updated_at: Date;
 }
@@ -15,4 +16,5 @@ export interface UserInput {
     phone: string;
     avatar?: string;
     address?: string;
+    money?: number;
 }

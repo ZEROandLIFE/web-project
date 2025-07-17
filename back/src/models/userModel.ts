@@ -3,13 +3,13 @@ import { User, UserInput } from '../types/register';
 
 class UserModel {
     async createUser(userData: UserInput): Promise<User> {
-        const { username, password, phone, avatar = 'default-avatar.png', address = '' } = userData;
+        const { username, password, phone, avatar = 'default-avatar.png', address = '',money = 0 } = userData;
         
         const [result] = await pool.execute(
-            'INSERT INTO users (username, password, phone, avatar, address) VALUES (?, ?, ?, ?, ?)',
-            [username, password, phone, avatar, address]
-        );
-        return this.getUserById((result as any).insertId)!;
+        'INSERT INTO users (username, password, phone, avatar, address, money) VALUES (?, ?, ?, ?, ?, ?)',
+        [username, password, phone, avatar, address, money]
+    );
+    return this.getUserById((result as any).insertId)!;
     }
 
    async getUserById(id: number): Promise<User> {
@@ -32,6 +32,13 @@ class UserModel {
         const [rows] = await pool.execute('SELECT * FROM users WHERE phone = ?', [phone]);
         return (rows as User[])[0] || null;
     }
+
+    async updateMoney(userId: number, amount: number): Promise<void> {
+    await pool.execute(
+        'UPDATE users SET money = money + ? WHERE id = ?',
+        [amount, userId]
+    );
+}
 }
 
 export default new UserModel();
