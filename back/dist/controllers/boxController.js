@@ -4,17 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const boxService_1 = __importDefault(require("../services/boxService"));
-const inspector_1 = require("inspector");
 class BoxController {
     // 创建盲盒
     async createBox(req, res) {
         try {
-            inspector_1.console.log(1);
             const user = req.user; // 从认证中间件获取用户信息
             //调试
-            inspector_1.console.log('接收到的请求体:', req.body);
-            inspector_1.console.log('解析后的items:', req.body.items);
-            inspector_1.console.log('认证用户:', user);
             const boxData = {
                 ...req.body,
                 userId: user.id,
@@ -28,16 +23,11 @@ class BoxController {
         }
     }
     async getAllBoxes(req, res) {
-        inspector_1.console.log("?");
         try {
-            inspector_1.console.log("Controller: 进入 getAllBoxes");
             const boxes = await boxService_1.default.getAllBoxes();
-            inspector_1.console.log("Controller: 获取到的 boxes:", boxes); // 检查这里是否真的是 []
             res.json(boxes);
-            inspector_1.console.log("Controller: 响应已发送"); // 检查这里是否执行
         }
         catch (error) {
-            inspector_1.console.error("Controller: 捕获到错误:", error); // 检查这里是否执行
             res.status(500).json({ error: error.message });
         }
     }
@@ -59,6 +49,23 @@ class BoxController {
             }
             const result = await boxService_1.default.uploadBoxImage(req.file);
             res.json(result);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+    // 删除盲盒
+    async deleteBox(req, res) {
+        try {
+            const user = req.user;
+            const boxId = parseInt(req.params.id);
+            // 验证用户是否有权限操作这个盲盒
+            const box = await boxService_1.default.getBoxById(boxId);
+            if (box.userId !== user.id) {
+                return res.status(403).json({ error: '无权操作此盲盒' });
+            }
+            await boxService_1.default.deleteBox(boxId);
+            res.json({ message: '盲盒已删除' });
         }
         catch (error) {
             res.status(400).json({ error: error.message });

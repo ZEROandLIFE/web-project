@@ -7,12 +7,8 @@ class BoxController {
     // 创建盲盒
     async createBox(req: Request, res: Response) {
         try {
-            console.log(1);
             const user = (req as any).user; // 从认证中间件获取用户信息
             //调试
-            console.log('接收到的请求体:', req.body); 
-            console.log('解析后的items:', req.body.items); 
-            console.log('认证用户:', user); 
             const boxData = {
                 ...req.body,
                 userId: user.id,
@@ -26,15 +22,10 @@ class BoxController {
     }
 
     async getAllBoxes(req: Request, res: Response) {
-        console.log("?")
         try {
-            console.log("Controller: 进入 getAllBoxes");
             const boxes = await BoxService.getAllBoxes();
-            console.log("Controller: 获取到的 boxes:", boxes); // 检查这里是否真的是 []
             res.json(boxes);
-            console.log("Controller: 响应已发送"); // 检查这里是否执行
         } catch (error: any) {
-            console.error("Controller: 捕获到错误:", error); // 检查这里是否执行
             res.status(500).json({ error: error.message });
         }
     }
@@ -58,6 +49,24 @@ class BoxController {
             
             const result = await BoxService.uploadBoxImage(req.file);
             res.json(result);
+        } catch (error: any) {
+            res.status(400).json({ error: error.message });
+        }
+    }
+        // 删除盲盒
+    async deleteBox(req: Request, res: Response) {
+        try {
+            const user = (req as any).user;
+            const boxId = parseInt(req.params.id);
+            
+            // 验证用户是否有权限操作这个盲盒
+            const box = await BoxService.getBoxById(boxId);
+            if (box.userId !== user.id) {
+                return res.status(403).json({ error: '无权操作此盲盒' });
+            }
+            
+            await BoxService.deleteBox(boxId);
+            res.json({ message: '盲盒已删除' });
         } catch (error: any) {
             res.status(400).json({ error: error.message });
         }

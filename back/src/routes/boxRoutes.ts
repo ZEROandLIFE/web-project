@@ -18,4 +18,6 @@ router.get('/:id', BoxController.getBoxById);
 // 上传盲盒图片
 router.post('/upload', authenticate, upload.single('image'), BoxController.uploadBoxImage);
 
+router.delete('/:id', authenticate, BoxController.deleteBox);
+
 export default router;

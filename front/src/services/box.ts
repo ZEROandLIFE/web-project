@@ -46,3 +46,8 @@ export const uploadBoxImage = async (file: File): Promise<{ url: string }> => {
     });
     return response.data;
 };
+// 删除盲盒
+export const deleteBox = async (boxId: string): Promise<{ message: string }> => {
+    const response = await api.delete(`/boxes/${boxId}`);
+    return response.data;
+};

@@ -9,7 +9,6 @@ class BoxService {
     // 创建盲盒
     async createBox(boxData) {
         // 验证盲盒数量不超过物品数量总和
-        console.log(1);
         const totalItems = boxData.items.reduce((sum, item) => sum + item.quantity, 0);
         if (boxData.boxNum > totalItems) {
             throw new Error('盲盒的数量不能大于包含物品中所有物品数量总和');
@@ -18,9 +17,7 @@ class BoxService {
     }
     // 获取所有盲盒
     async getAllBoxes() {
-        console.log("Service: 进入 getAllBoxes");
         const boxes = await boxModel_1.default.getAllBoxes();
-        console.log("Service: 获取到的 boxes:", boxes); // 检查这里是否真的是 []
         return boxes;
         // return BoxModel.getAllBoxes();
     }
@@ -33,6 +30,10 @@ class BoxService {
         // 这里可以添加图片处理逻辑，如压缩、格式转换等
         // 实际项目中可能会上传到云存储服务如AWS S3、阿里云OSS等
         return { url: `/uploads/${file.filename}` };
+    }
+    // 删除盲盒
+    async deleteBox(boxId) {
+        await boxModel_1.default.deleteBox(boxId);
     }
 }
 exports.default = new BoxService();

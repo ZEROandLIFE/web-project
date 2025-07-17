@@ -10,14 +10,12 @@ class BoxModel {
         try {
             await connection.beginTransaction();
             // 插入盲盒基本信息\
-            console.log(2);
             const [boxResult] = await connection.execute<ResultSetHeader>(
                 `INSERT INTO boxes 
                 (boxName, boxDescription, boxNum, boxAvatar, price, userId) 
                 VALUES (?, ?, ?, ?, ?, ?)`,
                 [boxName, boxDescription, boxNum, boxAvatar||null, price, userId]
             );
-            console.log(3);
             const boxId = boxResult.insertId;
             // 插入盲盒物品
             for (const item of items) {
@@ -28,7 +26,6 @@ class BoxModel {
                     [boxId, item.name, item.quantity]
                 );
             }
-            console.log(4);
             await connection.commit();
             return this.getBoxById(boxId);
         } catch (error) {
@@ -41,29 +38,22 @@ class BoxModel {
 
     // 获取所有盲盒
     async getAllBoxes(): Promise<Box[]> {
-        console.log("进来了model");
         const [rows] = await pool.execute<(Box & RowDataPacket)[]>(
             `SELECT * FROM boxes ORDER BY created_at DESC`
         );
-        console.log("到这没错");
         // 获取每个盲盒的物品
         for (const box of rows) {
             try {
-                console.log("当前 box:", box);
-                
-
                 const [items] = await pool.execute<(BoxItem & RowDataPacket)[]>(
                     `SELECT itemName as name, quantity 
-                    FROM boxItems WHERE boxId = ?`,
+                    FROM box_items WHERE boxId = ?`,
                     [box.boxId] 
                 );
                 box.items = items;
                 } catch (error) {
-                    console.error("查询 box_items 时出错:", error);
                     box.items = [];
             }
         }
-        console.log(rows);
         return rows;
     }
 
@@ -89,6 +79,32 @@ class BoxModel {
         
         box.items = items;
         return box;
+    }
+    // 删除盲盒
+    async deleteBox(boxId: number): Promise<void> {
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+            
+            // 先删除关联的物品
+            await connection.execute(
+                `DELETE FROM box_items WHERE boxId = ?`,
+                [boxId]
+            );
+            
+            // 再删除盲盒
+            await connection.execute(
+                `DELETE FROM boxes WHERE boxId = ?`,
+                [boxId]
+            );
+            
+            await connection.commit();
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
     }
 }
 
