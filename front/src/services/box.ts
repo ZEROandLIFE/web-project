@@ -1,6 +1,6 @@
 
 import api from './api';
-interface BoxItem {
+export interface BoxItem {
     name: string;
     quantity: number;
 }
@@ -44,6 +44,16 @@ export const uploadBoxImage = async (file: File): Promise<{ url: string }> => {
             'Content-Type': 'multipart/form-data'
         }
     });
+    return response.data;
+};
+//购买盲盒
+export const purchaseBox = async (boxId: string): Promise<{
+    success: boolean;
+    item: BoxItem;
+    remaining: number;
+    message: string;
+}> => {
+    const response = await api.post(`/boxes/${boxId}/purchase`);
     return response.data;
 };
 // 删除盲盒

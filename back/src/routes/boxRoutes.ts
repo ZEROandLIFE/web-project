@@ -20,4 +20,5 @@ router.post('/upload', authenticate, upload.single('image'), BoxController.uploa
 
 router.delete('/:id', authenticate, BoxController.deleteBox);
 
+router.post('/:id/purchase', authenticate, BoxController.purchaseBox);
 export default router;

@@ -5,8 +5,11 @@ import {  useNavigate } from 'react-router-dom';
 import { getBoxById } from '../../services/box';
 import { deleteBox } from '../../services/box';
 import type{Box} from "../../services/box";
+import type{BoxItem} from "../../services/box";
 import { fetchCurrentUser } from '../../services/api';
 import Button from '../../components/common/Button';
+import { purchaseBox } from '../../services/box';
+import Modal from '../../components/common/Modal';
 // import Alert from '../../common/Alert';
 import './boxdetail.css';
 
@@ -17,6 +20,13 @@ const BoxDetail: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+    const [purchaseResult, setPurchaseResult] = useState<{
+        item?: BoxItem;
+        remaining?: number;
+        message?: string;
+    } | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -52,9 +62,45 @@ const BoxDetail: React.FC = () => {
         }
     };
 
-    const handlePurchase = () => {
-        // TODO: 实现购买逻辑
-        alert('购买功能待实现');
+    const handlePurchase = async () => {
+        setShowPurchaseModal(true);
+    };
+    const confirmPurchase = async () => {
+        try {
+            if (!boxId) return;
+
+            const result = await purchaseBox(boxId);
+
+            if (result.success) {
+                setPurchaseResult({
+                    item: result.item,
+                    remaining: result.remaining,
+                    message: result.message
+                });
+
+                // 更新盲盒数量显示
+                if (box) {
+                    setBox({
+                        ...box,
+                        boxNum: result.remaining
+                    });
+                }
+
+                // 如果盲盒已空，跳转回首页
+                if (result.remaining === 0) {
+                    setTimeout(() => {
+                        navigate('/home');
+                    }, 2000);
+                }
+            }
+        } catch (error: unknown) {
+                console.log(error);
+                alert(`购买失败: 余额不足或商品已售罄`);
+                navigate('/dashboard');
+
+        } finally {
+            setShowPurchaseModal(false);
+        }
     };
 
     if (loading) {
@@ -131,6 +177,44 @@ const BoxDetail: React.FC = () => {
                     </div>
                 </div>
             </div>
+            {showPurchaseModal && (
+                <Modal
+                    title="确认购买"
+                    onClose={() => setShowPurchaseModal(false)}
+                >
+                    <div className="purchase-modal-content">
+                        <p>确定要购买这个盲盒吗？</p>
+                        <p>价格: ¥{box?.price}</p>
+                        <div className="purchase-modal-actions">
+                            <Button
+                                onClick={() => setShowPurchaseModal(false)}
+                                variant="secondary"
+                            >
+                                取消
+                            </Button>
+                            <Button
+                                onClick={confirmPurchase}
+                                variant="primary"
+                            >
+                                确认购买
+                            </Button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
+            {/* 购买结果展示 */}
+            {purchaseResult && (
+                <div className="purchase-result">
+                    <h3>{purchaseResult.message}</h3>
+                    {purchaseResult.item && (
+                        <div className="purchase-item">
+                            <p>获得物品: {purchaseResult.item.name} *1</p>
+                            <p>盲盒剩余数量: {purchaseResult.remaining}</p>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

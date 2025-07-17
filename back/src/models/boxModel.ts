@@ -106,6 +106,43 @@ class BoxModel {
             connection.release();
         }
     }
+    async getAvailableItems(boxId: number): Promise<BoxItem[]> {
+        const [items] = await pool.execute<(BoxItem & RowDataPacket)[]>(
+            `SELECT itemName as name, quantity 
+            FROM box_items 
+            WHERE boxId = ? AND quantity > 0`,
+            [boxId]
+        );
+        return items;
+    }
+
+    async decrementItemQuantity(
+        boxId: number, 
+        itemName: string
+    ): Promise<void> {
+        await pool.execute(
+            `UPDATE box_items 
+            SET quantity = quantity - 1 
+            WHERE boxId = ? AND itemName = ? AND quantity > 0`,
+            [boxId, itemName]
+        );
+    }
+
+    async decrementBoxQuantity(boxId: number): Promise<number> {
+        await pool.execute(
+            `UPDATE boxes 
+            SET boxNum = boxNum - 1 
+            WHERE boxId = ? AND boxNum > 0`,
+            [boxId]
+        );
+        
+        const [rows] = await pool.execute<(Box & RowDataPacket)[]>(
+            `SELECT boxNum FROM boxes WHERE boxId = ?`,
+            [boxId]
+        );
+        
+        return rows[0].boxNum;
+    }
 }
 
 export default new BoxModel();

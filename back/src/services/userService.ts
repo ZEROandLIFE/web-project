@@ -65,7 +65,6 @@ class UserService {
 
 // 修改密码
 async changePassword(userId: number, newPassword: string): Promise<void> {
-    console.log(2)
     const hashedPassword = await hashPassword(newPassword);
     await UserModel.changePassword(userId, hashedPassword);
 }

@@ -55,7 +55,6 @@ class UserService {
     }
     // 修改密码
     async changePassword(userId, newPassword) {
-        console.log(2);
         const hashedPassword = await (0, bcrypt_1.hashPassword)(newPassword);
         await userModel_1.default.changePassword(userId, hashedPassword);
     }

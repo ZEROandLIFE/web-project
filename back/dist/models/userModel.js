@@ -47,9 +47,7 @@ class UserModel {
         await database_1.default.execute(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`, params);
     }
     async changePassword(userId, newPassword) {
-        console.log(3);
         await database_1.default.execute('UPDATE users SET password = ? WHERE id = ?', [newPassword, userId]);
-        console.log(4);
     }
 }
 exports.default = new UserModel();

@@ -139,7 +139,34 @@
 .boxdetail-not-found {
     color: #666;
 }
+/* 购买模态框样式 */
+.purchase-modal-content {
+    padding: 20px;
+    text-align: center;
+}
 
+.purchase-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* 购买结果样式 */
+.purchase-result {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.purchase-item {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+}
 /* 响应式设计 */
 @media (max-width: 768px) {
     .boxdetail-content {

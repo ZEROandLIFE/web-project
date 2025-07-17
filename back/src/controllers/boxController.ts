@@ -71,6 +71,26 @@ class BoxController {
             res.status(400).json({ error: error.message });
         }
     }
+    async purchaseBox(req: Request, res: Response) {
+    try {
+        const user = (req as any).user;
+        const boxId = parseInt(req.params.id);
+        
+        const result = await BoxService.purchaseBox(boxId, user.id);
+        
+        res.json({
+            success: true,
+            item: result.item,
+            remaining: result.remaining,
+            message: `恭喜获得: ${result.item.name}`
+        });
+    } catch (error: any) {
+        res.status(400).json({
+            success: false,
+            error: error.message,
+        });
+    }
+}
 }
 
 export default new BoxController();

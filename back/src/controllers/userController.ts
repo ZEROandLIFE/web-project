@@ -17,7 +17,6 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         const { password, ...userWithoutPassword } = user;
         res.json(userWithoutPassword);
     } catch (error) {
-        console.error('获取用户信息失败:', error);
         res.status(500).json({ error: '服务器错误' });
     }
 };
@@ -90,7 +89,7 @@ export const changePassword = async (req: Request, res: Response) => {
         if (newPassword !== confirmPassword) {
             return res.status(400).json({ error: '两次输入的密码不一致' });
         }
-        console.log(1)
+
         await UserService.changePassword(userId, newPassword);
         
         res.json({

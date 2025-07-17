@@ -68,12 +68,10 @@ class UserModel {
 }
 
     async changePassword(userId: number, newPassword: string): Promise<void> {
-        console.log(3)
         await pool.execute(
             'UPDATE users SET password = ? WHERE id = ?',
             [newPassword, userId]
         );
-        console.log(4)
     }
 }
 

@@ -18,4 +18,5 @@ router.get('/:id', boxController_1.default.getBoxById);
 // 上传盲盒图片
 router.post('/upload', auth_1.authenticate, upload.single('image'), boxController_1.default.uploadBoxImage);
 router.delete('/:id', auth_1.authenticate, boxController_1.default.deleteBox);
+router.post('/:id/purchase', auth_1.authenticate, boxController_1.default.purchaseBox);
 exports.default = router;

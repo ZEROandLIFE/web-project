@@ -151,7 +151,7 @@ const DashboardForm: React.FC = () => {
                     localStorage.removeItem('token');
                     navigate('/login'); // 确保 navigate 已正确导入
                 }, 2000);
-                
+
             }
         } catch (error: unknown) {
             if (error instanceof Error) {

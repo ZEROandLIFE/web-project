@@ -81,5 +81,23 @@ class BoxModel {
             connection.release();
         }
     }
+    async getAvailableItems(boxId) {
+        const [items] = await database_1.default.execute(`SELECT itemName as name, quantity 
+            FROM box_items 
+            WHERE boxId = ? AND quantity > 0`, [boxId]);
+        return items;
+    }
+    async decrementItemQuantity(boxId, itemName) {
+        await database_1.default.execute(`UPDATE box_items 
+            SET quantity = quantity - 1 
+            WHERE boxId = ? AND itemName = ? AND quantity > 0`, [boxId, itemName]);
+    }
+    async decrementBoxQuantity(boxId) {
+        await database_1.default.execute(`UPDATE boxes 
+            SET boxNum = boxNum - 1 
+            WHERE boxId = ? AND boxNum > 0`, [boxId]);
+        const [rows] = await database_1.default.execute(`SELECT boxNum FROM boxes WHERE boxId = ?`, [boxId]);
+        return rows[0].boxNum;
+    }
 }
 exports.default = new BoxModel();
