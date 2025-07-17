@@ -12,7 +12,7 @@ const NotFoundPage = () => {
                 <h2>页面未找到</h2>
                 <p>您访问的页面不存在或已被移除</p>
                 <Button
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate('/home')}
                     variant="primary"
                 >
                     返回首页

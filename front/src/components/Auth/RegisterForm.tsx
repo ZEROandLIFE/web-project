@@ -1,4 +1,4 @@
-import React, { useState, useRef, type ChangeEvent } from 'react';
+import React, { useState, useRef, useEffect,type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 import Input from '../common/Input';
@@ -16,6 +16,9 @@ interface FormData {
 }
 
 const RegisterForm: React.FC = () => {
+    useEffect(() => {
+        document.title = '用户注册 - 盲盒平台';
+    }, []);
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState<FormData>({

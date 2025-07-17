@@ -6,6 +6,9 @@ const LoginPage = lazy(() => import('./authPages/LoginPage'));
 const RegisterPage = lazy(() => import('./authPages/RegisterPage'));
 const DashboardPage =lazy(() => import('./authPages/DashboardPage'));
 const NotFoundPage = lazy(() => import('./head/NotFoundPage'));
+const Home=lazy(()=>import('./blindBox/home'));
+const CreateBox=lazy(()=>import('./blindBox/Box/createbox'));
+
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -26,13 +29,22 @@ export const router = createBrowserRouter([
                 path: '/dashboard',
                 element: <DashboardPage />,
             },
+            {
+                path: '/home',
+                element: <Home />,
+            },
+            {
+                path: '/createbox',
+                element: <CreateBox />,
 
+            },
+            {
+                path: '*',
+                element: <NotFoundPage />,
+            },
         ],
     },
-    {
-        path: '*',
-        element: <NotFoundPage />,
-    },
+
 
 
 ]);

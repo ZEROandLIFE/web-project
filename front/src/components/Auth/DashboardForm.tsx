@@ -18,6 +18,7 @@ const DashboardForm: React.FC = () => {
     const [error] = useState<string | null>(null);
 
     useEffect(() => {
+        document.title = '个人信息 - 盲盒平台';
         const loadUserData = async () => {
             try {
                 const data = await fetchCurrentUser();

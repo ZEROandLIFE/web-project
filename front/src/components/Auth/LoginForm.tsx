@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 import Input from '../common/Input';
@@ -6,6 +6,9 @@ import Alert from '../common/Alert';
 import { login } from '../../services/beforeLogin.ts';
 
 const LoginForm = () => {
+    useEffect(() => {
+        document.title = '用户登录 - 盲盒平台'; // 设置标题
+    }, []);
     const [formData, setFormData] = useState({
         username: '',
         password: '',
@@ -26,14 +29,6 @@ const LoginForm = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
-
-
-        // 测试账号直接通过
-        if (formData.username === '1' && formData.password === '1') {
-            localStorage.setItem('token', 'test-token');
-            navigate('/dashboard');
-            return;
-        }
 
 
         try {

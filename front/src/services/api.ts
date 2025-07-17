@@ -30,7 +30,7 @@ api.interceptors.response.use(
 // 获取当前用户信息
 export const fetchCurrentUser = async () => {
     try {
-        
+
         const response = await api.get('/current');
         return response.data;
     } catch (error) {
