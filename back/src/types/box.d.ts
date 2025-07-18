@@ -10,7 +10,7 @@ interface Box extends RowDataPacket {
     boxName: string;
     boxDescription: string;
     boxNum: number;
-    boxAvatar?: string;
+    boxAvatar?: string | null;
     price: number;
     userId: number;
     items: BoxItem[];

@@ -4,17 +4,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const registerService_1 = __importDefault(require("../services/registerService"));
+const imageService_1 = __importDefault(require("../services/imageService"));
 class RegisterController {
     async register(req, res) {
         try {
             const { username, password, phone, address } = req.body;
             const avatar = req.file; // 获取上传的文件
+            let avatarUrl = 'default-avatar.png';
+            if (avatar) {
+                avatarUrl = await imageService_1.default.uploadImage(req); // 使用 ImageService 上传图片
+            }
             const newUser = await registerService_1.default.register({
                 username,
                 password,
                 phone,
                 address,
-                avatar: avatar ? avatar.buffer.toString('base64') : undefined
+                avatar: avatar ? avatarUrl : undefined
             });
             // 返回
             res.status(201).json({

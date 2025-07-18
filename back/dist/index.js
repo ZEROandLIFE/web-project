@@ -8,6 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const authRouter_1 = __importDefault(require("./routes/authRouter"));
 const error_1 = require("./middleware/error");
 const boxRoutes_1 = __importDefault(require("./routes/boxRoutes"));
+const uploadRoutes_1 = __importDefault(require("./routes/uploadRoutes"));
 const multer_1 = __importDefault(require("multer"));
 require("dotenv/config");
 const app = (0, express_1.default)();
@@ -23,6 +24,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 const upload = (0, multer_1.default)();
 app.use('/api/auth', authRouter_1.default);
 app.use('/api/boxes', boxRoutes_1.default);
+app.use('/api/upload', uploadRoutes_1.default);
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });

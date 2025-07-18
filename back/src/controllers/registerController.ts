@@ -1,20 +1,24 @@
 import { Request, Response } from 'express';
 import RegisterService from '../services/registerService';
 import { UserInput } from '../types/register';
-
+import ImageService from '../services/imageService';
 class RegisterController {
 
     async register(req: Request, res: Response)  {
   try {
     const { username, password, phone, address } = req.body;
     const avatar = req.file; // 获取上传的文件
+    let avatarUrl = 'default-avatar.png';
+            if (avatar) {
+                avatarUrl = await ImageService.uploadImage(req); // 使用 ImageService 上传图片
+            }
   
     const newUser = await RegisterService.register({
       username,
       password,
       phone,
       address,
-      avatar: avatar ? avatar.buffer.toString('base64') : undefined
+      avatar: avatar ?  avatarUrl : undefined
     });
     // 返回
     res.status(201).json({

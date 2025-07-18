@@ -118,7 +118,7 @@ const RegisterForm: React.FC = () => {
             if (formData.avatar) {
                 formDataToSend.append('avatar', formData.avatar);
             }
-
+            console.log(formData.avatar);
             await register(
                 formData.username,
                 formData.password,

@@ -27,12 +27,6 @@ class BoxService {
     async getBoxById(boxId) {
         return boxModel_1.default.getBoxById(boxId);
     }
-    // 上传盲盒图片
-    async uploadBoxImage(file) {
-        // 这里可以添加图片处理逻辑，如压缩、格式转换等
-        // 实际项目中可能会上传到云存储服务如AWS S3、阿里云OSS等
-        return { url: `/uploads/${file.filename}` };
-    }
     // 删除盲盒
     async deleteBox(boxId) {
         await boxModel_1.default.deleteBox(boxId);

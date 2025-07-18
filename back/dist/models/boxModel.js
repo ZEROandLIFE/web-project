@@ -8,6 +8,7 @@ class BoxModel {
     // 创建盲盒
     async createBox(boxData) {
         const { boxName, boxDescription, boxNum, boxAvatar, price, userId, items } = boxData;
+        console.log(boxAvatar);
         const connection = await database_1.default.getConnection();
         try {
             await connection.beginTransaction();

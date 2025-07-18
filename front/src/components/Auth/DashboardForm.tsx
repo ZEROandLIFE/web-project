@@ -50,7 +50,6 @@ const DashboardForm: React.FC = () => {
                         avatar: data.avatar || 'https://via.placeholder.com/150',
                         phone: data.phone,
                     });
-
                     // 获取余额
                     const balanceData = await getBalance();
                     setBalance(balanceData.balance);

@@ -6,6 +6,7 @@ class BoxModel {
     // 创建盲盒
     async createBox(boxData: BoxInput): Promise<Box> {
         const { boxName, boxDescription, boxNum, boxAvatar, price, userId, items } = boxData;
+        console.log(boxAvatar)
         const connection = await pool.getConnection();
         try {
             await connection.beginTransaction();

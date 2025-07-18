@@ -3,7 +3,6 @@ import type { ChangeEvent } from 'react';
 import Button from '../../common/Button';
 import Input from '../../common/Input';
 import Alert from '../../common/Alert';
-import { uploadBoxImage } from '../../../services/box';
 import { fetchCurrentUser } from '../../../services/api';
 import Textarea from '../../common/Textarea';
 import '../../../blindBox/Box/createbox.css';
@@ -18,7 +17,7 @@ interface CreateBoxFormProps {
         boxName: string;
         boxDescription: string;
         boxNum: number;
-        boxAvatar?: string;
+        boxAvatar?: File;
         price: number;
         userId: string;
         items: BoxItem[];
@@ -27,16 +26,15 @@ interface CreateBoxFormProps {
 
 const CreateBoxForm: React.FC<CreateBoxFormProps> = ({ onSubmit }) => {
     const [boxName, setBoxName] = useState('');
-    const [boxDescription, setBoxDescription] = useState(''); // 新增描述状态
+    const [boxDescription, setBoxDescription] = useState('');
     const [boxNum, setBoxNum] = useState(0);
-    const [boxAvatar, setBoxAvatar] = useState('');
+    const [boxAvatarFile, setBoxAvatarFile] = useState<File | null>(null);
+    const [boxAvatarPreview, setBoxAvatarPreview] = useState('');
     const [price, setPrice] = useState(0);
     const [items, setItems] = useState<BoxItem[]>([{ name: '', quantity: 0 }]);
     const [error, setError] = useState('');
-    const [isUploading, setIsUploading] = useState(false);
-    const [userId, setUserId] = useState(''); // 从API获取用户ID
+    const [userId, setUserId] = useState('');
 
-    // 组件加载时获取用户信息
     useEffect(() => {
         document.title = '创建盲盒 - 盲盒平台';
         const fetchUser = async () => {
@@ -51,20 +49,14 @@ const CreateBoxForm: React.FC<CreateBoxFormProps> = ({ onSubmit }) => {
         fetchUser();
     }, []);
 
-    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files) return;
-
-        setIsUploading(true);
-        try {
+    const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            const { url } = await uploadBoxImage(file);
-            setBoxAvatar(url);
-            setError('');
-        } catch (err) {
-            console.log(err);
-            setError('图片上传失败');
-        } finally {
-            setIsUploading(false);
+            setBoxAvatarFile(file);
+
+            // 创建预览URL
+            const previewUrl = URL.createObjectURL(file);
+            setBoxAvatarPreview(previewUrl);
         }
     };
 
@@ -89,7 +81,6 @@ const CreateBoxForm: React.FC<CreateBoxFormProps> = ({ onSubmit }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         // 验证盲盒数量不超过物品数量总和
         const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
         if (boxNum > totalItems) {
@@ -97,7 +88,7 @@ const CreateBoxForm: React.FC<CreateBoxFormProps> = ({ onSubmit }) => {
             return;
         }
 
-        if (!boxName  || items.some(item => !item.name || item.quantity <= 0)) {//|| !boxAvatar
+        if (!boxName || items.some(item => !item.name || item.quantity <= 0)) {
             setError('请填写所有必填字段');
             return;
         }
@@ -106,21 +97,20 @@ const CreateBoxForm: React.FC<CreateBoxFormProps> = ({ onSubmit }) => {
             setError('无法获取用户信息，请重新登录');
             return;
         }
-        console.log('提交的数据:', {
-            boxName,
+
+        console.log(boxName,
             boxDescription,
             boxNum,
-            boxAvatar,
+            boxAvatarFile ,
             price,
             userId,
-            items
-        });
+            items)
 
         onSubmit({
             boxName,
             boxDescription,
             boxNum,
-            boxAvatar,
+            boxAvatar: boxAvatarFile || undefined,
             price,
             userId,
             items
@@ -175,12 +165,10 @@ const CreateBoxForm: React.FC<CreateBoxFormProps> = ({ onSubmit }) => {
                     accept="image/*"
                     onChange={handleImageUpload}
                     className="form-file-input"
-                    // required
                 />
-                {isUploading && <div className="upload-status">上传中...</div>}
-                {boxAvatar && (
+                {boxAvatarPreview && (
                     <div className="image-preview">
-                        <img src={boxAvatar} alt="盲盒封面预览" />
+                        <img src={boxAvatarPreview} alt="盲盒封面预览" />
                     </div>
                 )}
             </div>
