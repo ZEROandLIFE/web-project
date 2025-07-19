@@ -41,13 +41,9 @@ class BoxService {
             // 获取用户余额
             const user = await userModel_1.default.getUserById(userId);
             // 验证余额是否足够
-            console.log(user.money);
-            console.log(box.price);
-            console.log(user.money < box.price);
             if (Number(user.money) < Number(box.price)) {
                 throw new Error('余额不足');
             }
-            console.log("没执行");
             // 获取可用物品
             const availableItems = await boxModel_1.default.getAvailableItems(boxId);
             if (availableItems.length === 0) {

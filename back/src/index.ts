@@ -5,6 +5,7 @@ import { notFound, errorHandler } from './middleware/error';
 import boxRoutes from './routes/boxRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import orderRoutes from './routes/orderRoutes';
+import showRoutes from './routes/showRoutes';
 import multer from 'multer';
 import 'dotenv/config'; 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/boxes', boxRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/shows', showRoutes);
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });

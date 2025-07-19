@@ -10,6 +10,7 @@ const error_1 = require("./middleware/error");
 const boxRoutes_1 = __importDefault(require("./routes/boxRoutes"));
 const uploadRoutes_1 = __importDefault(require("./routes/uploadRoutes"));
 const orderRoutes_1 = __importDefault(require("./routes/orderRoutes"));
+const showRoutes_1 = __importDefault(require("./routes/showRoutes"));
 const multer_1 = __importDefault(require("multer"));
 require("dotenv/config");
 const app = (0, express_1.default)();
@@ -27,6 +28,7 @@ app.use('/api/auth', authRouter_1.default);
 app.use('/api/boxes', boxRoutes_1.default);
 app.use('/api/upload', uploadRoutes_1.default);
 app.use('/api/orders', orderRoutes_1.default);
+app.use('/api/shows', showRoutes_1.default);
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });

@@ -21,7 +21,7 @@ const Head: React.FC = () => {
                     <li className="head-nav-item" onClick={() => navigate('/home')}>首页</li>
                     <li className="head-nav-item" onClick={() => navigate('/warehouse')}>我的仓库</li>
                     <li className="head-nav-item" onClick={() => navigate('/order')}>订单记录</li>
-                    <li className="head-nav-item" onClick={() => navigate('/dashboard')}>玩家秀</li>
+                    <li className="head-nav-item" onClick={() => navigate('/show')}>玩家秀</li>
                     <li className="head-nav-item" onClick={() => navigate('/dashboard')}>个人主页</li>
                     <li className="head-nav-item" onClick={handleLogout}>退出</li>
                 </ul>
