@@ -33,7 +33,7 @@ const OrderPage: React.FC = () => {
                 } else {
                     response = await getMyOrders();
                 }
-
+                console.log(response);
                 // 排序
                 const sortedOrders = [...response.orders].sort((a, b) => {
                     if (sortBy === 'date') {

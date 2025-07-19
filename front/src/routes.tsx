@@ -10,6 +10,7 @@ const Home=lazy(()=>import('./blindBox/home'));
 const CreateBox=lazy(()=>import('./blindBox/Box/createbox'));
 const BoxDetail = lazy(() => import('./blindBox/Box/boxdetail'));
 const OrderPage=lazy(() =>import ('./blindBox/orderPage'));
+const Warehouse=lazy(()=>import('./blindBox/warehouse'));
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
             {
                 path: '/order',
                 element: <OrderPage />,
+            },
+            {
+                path: '/warehouse',
+                element: <Warehouse />,
             },
             {
                 path: '*',
