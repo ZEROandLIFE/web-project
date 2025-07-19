@@ -20,7 +20,6 @@ class BoxController {
             console.error('解析 items 失败:', err);
             return res.status(400).json({ error: '物品列表格式不正确' });
         }
-console.log(1)
         // 上传图片并获取 URL
         let boxAvatar: string | undefined = undefined; // 明确类型
         const avatar = req.file;
@@ -31,7 +30,6 @@ console.log(1)
                 console.log(avatarUrl);
             }
         }
-console.log(2)
         const boxData = {
             boxName,
             boxDescription,
@@ -41,7 +39,6 @@ console.log(2)
             items: parsedItems,
             boxAvatar :avatar ?  avatarUrl : undefined
         };
-console.log(3)
         const box = await BoxService.createBox(boxData);
         res.status(201).json(box);
     } catch (error: any) {

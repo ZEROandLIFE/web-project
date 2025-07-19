@@ -1,0 +1,70 @@
+/* OrderPage.css */
+.order-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.order-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.order-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.view-mode {
+    display: flex;
+    gap: 10px;
+}
+
+.sort-options {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-options .active {
+    font-weight: bold;
+    color: #1890ff;
+}
+
+.order-list {
+    margin-top: 20px;
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.order-table th, .order-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.order-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+.order-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.no-orders {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+}

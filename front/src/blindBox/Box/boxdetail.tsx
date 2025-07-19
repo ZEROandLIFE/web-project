@@ -93,11 +93,22 @@ const BoxDetail: React.FC = () => {
                     }, 2000);
                 }
             }
-        } catch (error: unknown) {
-                console.log(error);
-                alert(`购买失败: 余额不足或商品已售罄`);
-                navigate('/dashboard');
-
+        } catch (error: any) {
+            if (error.response) {
+                const { data } = error.response;
+                if (data.error === '余额不足') {
+                    alert('购买失败: 余额不足，请充值');
+                    console.log(data.error);
+                    navigate('/dashboard');
+                } else if (data.error === '该盲盒已无可用物品' || data.error === 'Box not found') {
+                    alert('购买失败: 盲盒已售罄');
+                    navigate('/home');
+                } else {
+                    alert(`购买失败: ${data.error || '未知错误'}`);
+                }
+            } else {
+                alert('购买失败: 网络错误');
+            }
         } finally {
             setShowPurchaseModal(false);
         }

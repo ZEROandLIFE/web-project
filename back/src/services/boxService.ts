@@ -4,7 +4,7 @@ import { Box, BoxInput } from '../types/box';
 import { BoxItem } from '../types/box'
 import pool from '../config/database';  
 // import api from './api';
-
+import OrderService from "./orderService"
 class BoxService {
     // 创建盲盒
     async createBox(boxData: Omit<BoxInput, 'boxId'>): Promise<Box> {
@@ -44,10 +44,10 @@ class BoxService {
             const user = await userModel.getUserById(userId);
             
             // 验证余额是否足够
-            if (user.money < box.price) {
+
+            if (Number(user.money) < Number(box.price)) {
                 throw new Error('余额不足');
             }
-
             // 获取可用物品
             const availableItems = await BoxModel.getAvailableItems(boxId);
             if (availableItems.length === 0) {
@@ -66,6 +66,15 @@ class BoxService {
 
             // 扣除用户余额
             await userModel.updateMoney(userId, -box.price);
+            // 创建订单并给卖家加钱
+            await OrderService.createOrderAndPaySeller({
+            boxId,
+            sellerId: box.userId,
+            buyerId: userId,
+            boxName: box.boxName,
+            itemName: selectedItem.name,
+            price: box.price
+        });
 
             // 检查盲盒是否已空
             if (remaining === 0) {
