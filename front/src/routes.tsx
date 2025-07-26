@@ -12,6 +12,7 @@ const BoxDetail = lazy(() => import('./blindBox/Box/boxdetail'));
 const OrderPage=lazy(() =>import ('./blindBox/orderPage'));
 const Warehouse=lazy(()=>import('./blindBox/warehouse'));
 const ShowPage =lazy(()=>import('./blindBox/showPage'));
+const AdminOrderPage=lazy(()=>import('./blindBox/AdminOrderPage'))
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -48,6 +49,10 @@ export const router = createBrowserRouter([
             {
                 path: '/order',
                 element: <OrderPage />,
+            },
+            {
+                path: '/adminorder',
+                element: <AdminOrderPage />,
             },
             {
                 path: '/warehouse',

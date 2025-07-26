@@ -271,8 +271,18 @@ const DashboardForm: React.FC = () => {
                     >
                         修改密码
                     </Button>
+                    {userData.role === 'admin' && (
+                        <div className="dashboard-button-row">
+                            <Button
+                                onClick={()=>navigate('/adminorder')} variant="secondary">
+                                完整订单
+                            </Button>
+                        </div>
+                    )}
                 </div>
+
                 <div className="dashboard-button-row">
+
                     <Button
                         onClick={handleLogout}
                         variant="text"

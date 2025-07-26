@@ -21,5 +21,40 @@ interface OrderInput {
     itemName: string;
     price: number;
 }
+interface AdminOrderQuery {
+    page: number;
+    pageSize: number;
+    sortBy: string;
+    sortOrder: 'asc' | 'desc';
+    search?: string;
+    sellerId?: number;
+    buyerId?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    startDate?: Date;
+    endDate?: Date;
+}
 
-export { Order, OrderInput };
+interface OrderStats {
+    totalOrders: number;
+    totalRevenue: number;
+    avgOrderValue: number;
+    orderTrends: Array<{
+        date: string;
+        count: number;
+        revenue: number;
+    }>;
+    topSellers: Array<{
+        userId: number;
+        username: string;
+        orderCount: number;
+        totalRevenue: number;
+    }>;
+    topBuyers: Array<{
+        userId: number;
+        username: string;
+        orderCount: number;
+        totalSpent: number;
+    }>;
+}
+export { Order, OrderInput,AdminOrderQuery,OrderStats };
