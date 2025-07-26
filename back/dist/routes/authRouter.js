@@ -9,6 +9,7 @@ const loginController_1 = __importDefault(require("../controllers/loginControlle
 const userController_1 = require("../controllers/userController");
 const auth_1 = require("../middleware/auth");
 const userController_2 = require("../controllers/userController");
+const userController_3 = require("../controllers/userController");
 const multer_1 = __importDefault(require("multer"));
 const upload = (0, multer_1.default)(); // 内存存储，用于处理文件上传
 const router = express_1.default.Router();
@@ -24,4 +25,5 @@ router.get('/balance', auth_1.authenticate, userController_2.getBalance);
 router.put('/profile', auth_1.authenticate, userController_2.updateProfile);
 // 修改密码
 router.put('/password', auth_1.authenticate, userController_2.changePassword);
+router.put('/admin/:userId', auth_1.authenticate, userController_3.setAdminRole);
 exports.default = router;

@@ -102,4 +102,21 @@ export const changePassword = async (req: Request, res: Response) => {
             error: error.message
         });
     }
+    
+};
+export const setAdminRole = async (req: Request, res: Response) => {
+        try {
+            const { userId } = req.params;
+            const updatedUser = await UserService.setAdminRole(Number(userId));
+            
+            res.json({
+            success: true,
+            user: updatedUser
+            });
+        } catch (error: any) {
+            res.status(400).json({
+            success: false,
+            error: error.message
+            });
+        }
 };

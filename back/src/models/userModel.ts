@@ -3,11 +3,11 @@ import { User, UserInput } from '../types/register';
 
 class UserModel {
     async createUser(userData: UserInput): Promise<User> {
-        const { username, password, phone, avatar = 'default-avatar.png', address = '',money = 0 } = userData;
+        const { username, password, phone, avatar = 'default-avatar.png', address = '',money = 0 , role = 'user'} = userData;
         
         const [result] = await pool.execute(
-        'INSERT INTO users (username, password, phone, avatar, address, money) VALUES (?, ?, ?, ?, ?, ?)',
-        [username, password, phone, avatar, address, money]
+        'INSERT INTO users (username, password, phone, avatar, address, money,role) VALUES (?, ?, ?, ?, ?, ?,?)',
+        [username, password, phone, avatar, address, money,role]
     );
     return this.getUserById((result as any).insertId)!;
     }
@@ -71,6 +71,13 @@ class UserModel {
         await pool.execute(
             'UPDATE users SET password = ? WHERE id = ?',
             [newPassword, userId]
+        );
+    }
+
+    async setUserRole(userId: number, role: 'user' | 'admin'): Promise<void> {
+        await pool.execute(
+        'UPDATE users SET role = ? WHERE id = ?',
+        [role, userId]
         );
     }
 }

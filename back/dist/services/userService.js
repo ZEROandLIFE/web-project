@@ -58,5 +58,11 @@ class UserService {
         const hashedPassword = await (0, bcrypt_1.hashPassword)(newPassword);
         await userModel_1.default.changePassword(userId, hashedPassword);
     }
+    // 设置管理员权限
+    async setAdminRole(userId) {
+        const role = 'admin';
+        await userModel_1.default.setUserRole(userId, role);
+        return userModel_1.default.getUserById(userId);
+    }
 }
 exports.default = new UserService();

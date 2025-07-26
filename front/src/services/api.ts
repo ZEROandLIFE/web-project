@@ -81,4 +81,16 @@ export const changePassword = async (passwords: {
         throw error;
     }
 };
+export const setAdminRole = async (
+    userId: number,
+): Promise<{ success: boolean; user: any }> => {
+    try {
+        console.log(userId);
+        const response = await api.put(`/auth/admin/${userId}`);
+        return response.data;
+    } catch (error) {
+        console.error('设置管理员权限失败:', error);
+        throw error;
+    }
+};
 export default api;

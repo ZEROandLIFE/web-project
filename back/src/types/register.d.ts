@@ -8,6 +8,7 @@ export interface User {
     money: number;
     created_at: Date;
     updated_at: Date;
+    role: 'user' | 'admin';
 }
 
 export interface UserInput {
@@ -17,4 +18,5 @@ export interface UserInput {
     avatar?: string;
     address?: string;
     money?: number;
+    role?: 'user' | 'admin';
 }

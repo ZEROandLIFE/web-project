@@ -6,13 +6,15 @@ import Alert from '../common/Alert';
 import Modal from '../common/Modal';
 import Textarea from '../common/Textarea';
 import '../../authPages/Dashboard.css';
-import { fetchCurrentUser, getBalance, rechargeMoney,updateProfile,changePassword } from '../../services/api';
+import { fetchCurrentUser, getBalance, rechargeMoney,updateProfile,changePassword,setAdminRole } from '../../services/api';
 
 interface UserData {
     username: string;
     address?: string;
     avatar?: string;
     phone: string;
+    role: 'user' | 'admin';
+    id: number;
 }
 
 const DashboardForm: React.FC = () => {
@@ -25,6 +27,8 @@ const DashboardForm: React.FC = () => {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [rechargeAmount, setRechargeAmount] = useState('');
+    const [inviteCode, setInviteCode] = useState('');
+    const [showInviteModal, setShowInviteModal] = useState(false);
     const [newProfile, setNewProfile] = useState({
         username: '',
         address: ''
@@ -49,6 +53,8 @@ const DashboardForm: React.FC = () => {
                         address: data.address,
                         avatar: data.avatar || 'https://via.placeholder.com/150',
                         phone: data.phone,
+                        role: data.role,
+                        id: data.id
                     });
                     // 获取余额
                     const balanceData = await getBalance();
@@ -127,7 +133,30 @@ const DashboardForm: React.FC = () => {
             }
         }
     };
-
+    const handleInviteCodeSubmit = async () => {
+        if (inviteCode.trim() === '114514') {
+            try {
+                console.log(userData);
+                const result = await setAdminRole(
+                    (userData as any).id
+                );
+                console.log(result);
+                if (result.success) {
+                    setAlert({ type: 'success', message: '您已成为管理员！' });
+                    // 刷新页面获取最新数据
+                    window.location.reload();
+                }
+            } catch (error) {
+                setAlert({ type: 'error', message: '设置管理员权限失败' });
+            }
+        } else {
+            setAlert({ type: 'error', message: '邀请码错误' });
+            setInviteCode('');
+            // 2秒后自动刷新
+            setTimeout(() => window.location.reload(), 2000);
+        }
+        setShowInviteModal(false);
+    };
     const handleUpdatePassword = async () => {
         try {
             if (newPassword.password !== newPassword.confirmPassword) {
@@ -205,7 +234,7 @@ const DashboardForm: React.FC = () => {
                 )}
                 <p className="dashboard-phone">手机号：{userData.phone}</p>
                 <p className="dashboard-balance">账户余额：¥{balance}</p>
-
+                <p className="dashboard-balance">用户角色：{userData.role === 'admin' ? '管理员' : '普通用户'}</p>
                 {/* 充值按钮 */}
                 <div className="dashboard-button-row">
                     <Button
@@ -217,6 +246,16 @@ const DashboardForm: React.FC = () => {
                 </div>
             </div>
 
+            {userData.role === 'user' && (
+                <div className="dashboard-button-row">
+                    <Button
+                        onClick={() => setShowInviteModal(true)}
+                        variant="secondary"
+                    >
+                        输入管理员邀请码
+                    </Button>
+                </div>
+            )}
             {/* 修改信息按钮 */}
             <div className="dashboard-buttons">
                 <div className="dashboard-button-row">
@@ -318,7 +357,37 @@ const DashboardForm: React.FC = () => {
                     </div>
                 </Modal>
             )}
-
+            {/* 邀请码模态框 */}
+            {showInviteModal && (
+                <Modal
+                    title="输入管理员邀请码"
+                    onClose={() => setShowInviteModal(false)}
+                >
+                    <div className="dashboard-modal-content">
+                        <Input
+                            label="邀请码"
+                            type="password"
+                            value={inviteCode}
+                            onChange={(e) => setInviteCode(e.target.value)}
+                            placeholder="请输入管理员邀请码"
+                        />
+                        <div className="dashboard-modal-actions">
+                            <Button
+                                onClick={() => setShowInviteModal(false)}
+                                variant="secondary"
+                            >
+                                取消
+                            </Button>
+                            <Button
+                                onClick={handleInviteCodeSubmit}
+                                variant="primary"
+                            >
+                                确认
+                            </Button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
             {/* 修改密码模态框 */}
             {showPasswordModal && (
                 <Modal

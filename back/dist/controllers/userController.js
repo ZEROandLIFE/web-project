@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePassword = exports.updateProfile = exports.getBalance = exports.rechargeMoney = exports.getCurrentUser = void 0;
+exports.setAdminRole = exports.changePassword = exports.updateProfile = exports.getBalance = exports.rechargeMoney = exports.getCurrentUser = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const userService_1 = __importDefault(require("../services/userService"));
 const getCurrentUser = async (req, res) => {
@@ -105,3 +105,20 @@ const changePassword = async (req, res) => {
     }
 };
 exports.changePassword = changePassword;
+const setAdminRole = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const updatedUser = await userService_1.default.setAdminRole(Number(userId));
+        res.json({
+            success: true,
+            user: updatedUser
+        });
+    }
+    catch (error) {
+        res.status(400).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+exports.setAdminRole = setAdminRole;

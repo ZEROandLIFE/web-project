@@ -20,7 +20,7 @@ const BoxDetail: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
-
+    const [currentUserRole, setCurrentUserRole] = useState<'user' | 'admin'>('user');
     const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     const [purchaseResult, setPurchaseResult] = useState<{
         item?: BoxItem;
@@ -38,6 +38,7 @@ const BoxDetail: React.FC = () => {
                 // 获取当前用户ID
                 const user = await fetchCurrentUser();
                 setCurrentUserId(user.id);
+                setCurrentUserRole(user.role);
             } catch (err) {
                 console.error('获取数据失败:', err);
                 setError('获取盲盒详情失败，请稍后重试');
@@ -131,7 +132,7 @@ const BoxDetail: React.FC = () => {
             <div className="boxdetail-header">
                 <h1 className="boxdetail-title">{box.boxName}</h1>
                 <div className="boxdetail-actions">
-                    {currentUserId === box.userId ? (
+                    {currentUserId === box.userId || currentUserRole === 'admin'? (
                         <Button variant="secondary" onClick={handleTakeDown}>
                             下架盲盒
                         </Button>
