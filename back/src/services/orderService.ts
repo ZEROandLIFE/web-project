@@ -113,8 +113,7 @@ class OrderService {
         `;
         const mainParams = [...params, pageSize, offset];
         
-        console.log('执行查询:', mainQuery);
-        console.log('参数:', mainParams);
+    
 
         const [rows] = await connection.execute<(Order & RowDataPacket)[]>(mainQuery, mainParams);
         

@@ -49,7 +49,6 @@ router.get('/admin/all', auth_1.authenticate, async (req, res) => {
             return res.status(403).json({ error: '无权访问' });
         }
         const { page = 1, pageSize = 20, sortBy = 'createdAt', sortOrder = 'desc', search = '', sellerId, buyerId, minPrice, maxPrice, startDate, endDate } = req.query;
-        console.log(1);
         const result = await orderService_1.default.getAdminAllOrders({
             page: Number(page),
             pageSize: Number(pageSize),
@@ -63,7 +62,6 @@ router.get('/admin/all', auth_1.authenticate, async (req, res) => {
             startDate: startDate ? new Date(String(startDate)) : undefined,
             endDate: endDate ? new Date(String(endDate)) : undefined
         });
-        console.log(2);
         res.json(result);
     }
     catch (error) {

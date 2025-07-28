@@ -96,8 +96,6 @@ class OrderService {
             LIMIT ${pageSize} OFFSET ${offset}  
         `;
             const mainParams = [...params, pageSize, offset];
-            console.log('执行查询:', mainQuery);
-            console.log('参数:', mainParams);
             const [rows] = await connection.execute(mainQuery, mainParams);
             return {
                 orders: rows,
@@ -108,7 +106,7 @@ class OrderService {
         }
         catch (error) {
             console.error('数据库错误:', error);
-            throw new Error(`查询失败: ${error.message}`);
+            throw new Error(`查询失败`);
         }
         finally {
             connection.release();

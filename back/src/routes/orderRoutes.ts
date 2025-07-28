@@ -58,7 +58,6 @@ router.get('/admin/all', authenticate, async (req, res) => {
             startDate,
             endDate
         } = req.query;
-        console.log(1)
         const result = await OrderService.getAdminAllOrders({
             page: Number(page),
             pageSize: Number(pageSize),
@@ -72,7 +71,6 @@ router.get('/admin/all', authenticate, async (req, res) => {
             startDate: startDate ? new Date(String(startDate)) : undefined,
             endDate: endDate ? new Date(String(endDate)) : undefined
         });
-        console.log(2)
         res.json(result);
     } catch (error: any) {
         res.status(400).json({ error: error.message });
