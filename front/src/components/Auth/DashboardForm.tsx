@@ -274,8 +274,8 @@ const DashboardForm: React.FC = () => {
                     {userData.role === 'admin' && (
                         <div className="dashboard-button-row">
                             <Button
-                                onClick={()=>navigate('/adminorder')} variant="secondary">
-                                完整订单
+                                onClick={()=>navigate('/adminorder')} variant="danger">
+                                管理员订单管理系统
                             </Button>
                         </div>
                     )}

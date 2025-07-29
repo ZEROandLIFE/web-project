@@ -4,7 +4,7 @@ import './Button.css';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
     fullWidth?: boolean;
-    variant?: 'primary' | 'secondary' | 'text';
+    variant?: 'primary' | 'secondary' | 'text'| 'danger'|"success";
 }
 
 const Button: React.FC<ButtonProps> = ({

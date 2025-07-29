@@ -1,12 +1,12 @@
 // pages/OrderPage.tsx
 import React, { useState, useEffect } from 'react';
 import { getMyOrders, getOrdersAsSeller, getOrdersAsBuyer } from '../services/order';
-import type{ Order } from '../services/order.ts';
+import type { Order } from '../services/order.ts';
 
 import Alert from '../components/common/Alert';
 import Button from '../components/common/Button';
 import './OrderPage.css';
-import {fetchCurrentUser} from "../services/api.ts";
+import { fetchCurrentUser } from "../services/api.ts";
 
 const OrderPage: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -16,8 +16,11 @@ const OrderPage: React.FC = () => {
     const [sortBy, setSortBy] = useState<'date' | 'price'>('date');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [currentUser, setCurrentUser] = useState<{ id: number } | null>(null);
-    useEffect(() => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const itemsPerPage = 10;
 
+    useEffect(() => {
         const fetchOrders = async () => {
             const user = await fetchCurrentUser();
             setCurrentUser(user);
@@ -33,7 +36,7 @@ const OrderPage: React.FC = () => {
                 } else {
                     response = await getMyOrders();
                 }
-                console.log(response);
+
                 // 排序
                 const sortedOrders = [...response.orders].sort((a, b) => {
                     if (sortBy === 'date') {
@@ -48,6 +51,8 @@ const OrderPage: React.FC = () => {
                 });
 
                 setOrders(sortedOrders);
+                setTotalPages(Math.ceil(sortedOrders.length / itemsPerPage));
+                setCurrentPage(1); // 重置到第一页
             } catch (err) {
                 setError(err instanceof Error ? err.message : '获取订单失败');
             } finally {
@@ -69,6 +74,13 @@ const OrderPage: React.FC = () => {
             setSortBy(type);
             setSortOrder('desc');
         }
+    };
+
+    // 获取当前页的订单
+    const getCurrentOrders = () => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return orders.slice(startIndex, endIndex);
     };
 
     return (
@@ -125,34 +137,53 @@ const OrderPage: React.FC = () => {
                     {orders.length === 0 ? (
                         <div className="no-orders">暂无订单</div>
                     ) : (
-                        <table className="order-table">
-                            <thead>
-                            <tr>
-                                <th>订单ID</th>
-                                <th>盲盒名称</th>
-                                <th>获得物品</th>
-                                <th>金额</th>
-                                <th>交易类型</th>
-                                <th>交易时间</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {orders.map(order => (
-                                <tr key={order.orderId}>
-                                    <td>{order.orderId}</td>
-                                    <td>{order.boxName}</td>
-                                    <td>{order.itemName}</td>
-                                    <td>¥{order.price}</td>
-                                    <td>
-                                        {viewMode === 'all' && currentUser ? (
-                                            order.sellerId === currentUser.id ? '卖出' : '买入'
-                                        ) : viewMode === 'seller' ? '卖出' : '买入'}
-                                    </td>
-                                    <td>{new Date(order.createdAt).toLocaleString()}</td>
+                        <>
+                            <table className="order-table">
+                                <thead>
+                                <tr>
+                                    <th>订单ID</th>
+                                    <th>盲盒名称</th>
+                                    <th>获得物品</th>
+                                    <th>金额</th>
+                                    <th>交易类型</th>
+                                    <th>交易时间</th>
                                 </tr>
-                            ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                {getCurrentOrders().map(order => (
+                                    <tr key={order.orderId}>
+                                        <td>{order.orderId}</td>
+                                        <td>{order.boxName}</td>
+                                        <td>{order.itemName}</td>
+                                        <td>¥{order.price}</td>
+                                        <td>
+                                            {viewMode === 'all' && currentUser ? (
+                                                order.sellerId === currentUser.id ? '卖出' : '买入'
+                                            ) : viewMode === 'seller' ? '卖出' : '买入'}
+                                        </td>
+                                        <td>{new Date(order.createdAt).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                            {totalPages > 1 && (
+                                <div className="pagination-controls">
+                                    <Button
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        上一页
+                                    </Button>
+                                    <span>第 {currentPage} 页 / 共 {totalPages} 页</span>
+                                    <Button
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        下一页
+                                    </Button>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             )}

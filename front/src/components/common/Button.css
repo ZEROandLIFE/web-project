@@ -19,7 +19,11 @@
     background: transparent;
     color: #007bff;
 }
-
+.btn-danger {
+    background-color: #dc3545; /* 红色 */
+    color: white;
+    border: 1px solid #dc3545;
+}
 .btn-full {
     width: 100%;
 }

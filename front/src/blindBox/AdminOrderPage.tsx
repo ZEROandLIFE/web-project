@@ -14,6 +14,9 @@ const AdminOrderPage: React.FC = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [period, setPeriod] = useState<'day' | 'week' | 'month'>('week');
     const [activeTab, setActiveTab] = useState<'orders' | 'stats'>('orders');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -24,10 +27,11 @@ const AdminOrderPage: React.FC = () => {
                 const ordersResponse = await getAdminAllOrders({
                     sortBy,
                     sortOrder,
-                    page: 1,
-                    pageSize: 100
+                    page: currentPage,
+                    pageSize: itemsPerPage
                 });
                 setOrders(ordersResponse.orders);
+                setTotalPages(Math.ceil(ordersResponse.total / itemsPerPage));
 
                 // 获取统计数据
                 const statsResponse = await getOrderStats(period);
@@ -40,7 +44,7 @@ const AdminOrderPage: React.FC = () => {
         };
 
         fetchData();
-    }, [sortBy, sortOrder, period]);
+    }, [sortBy, sortOrder, period, currentPage]);
 
     const handleSortChange = (type: 'date' | 'price' | 'orderId') => {
         if (sortBy === type) {
@@ -49,6 +53,7 @@ const AdminOrderPage: React.FC = () => {
             setSortBy(type);
             setSortOrder('desc');
         }
+        setCurrentPage(1); // 重置到第一页
     };
 
     const handlePeriodChange = (newPeriod: 'day' | 'week' | 'month') => {
@@ -164,32 +169,51 @@ const AdminOrderPage: React.FC = () => {
                             {orders.length === 0 ? (
                                 <div className="no-orders">暂无订单</div>
                             ) : (
-                                <table className="admin-order-table">
-                                    <thead>
-                                    <tr>
-                                        <th>订单ID</th>
-                                        <th>盲盒名称</th>
-                                        <th>物品</th>
-                                        <th>卖家ID</th>
-                                        <th>买家ID</th>
-                                        <th>金额</th>
-                                        <th>交易时间</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {orders.map(order => (
-                                        <tr key={order.orderId}>
-                                            <td>{order.orderId}</td>
-                                            <td>{order.boxName}</td>
-                                            <td>{order.itemName}</td>
-                                            <td>{order.sellerId}</td>
-                                            <td>{order.buyerId}</td>
-                                            <td>¥{order.price}</td>
-                                            <td>{new Date(order.createdAt).toLocaleString()}</td>
+                                <>
+                                    <table className="admin-order-table">
+                                        <thead>
+                                        <tr>
+                                            <th>订单ID</th>
+                                            <th>盲盒名称</th>
+                                            <th>物品</th>
+                                            <th>卖家ID</th>
+                                            <th>买家ID</th>
+                                            <th>金额</th>
+                                            <th>交易时间</th>
                                         </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                        {orders.map(order => (
+                                            <tr key={order.orderId}>
+                                                <td>{order.orderId}</td>
+                                                <td>{order.boxName}</td>
+                                                <td>{order.itemName}</td>
+                                                <td>{order.sellerId}</td>
+                                                <td>{order.buyerId}</td>
+                                                <td>¥{order.price}</td>
+                                                <td>{new Date(order.createdAt).toLocaleString()}</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                    {totalPages > 1 && (
+                                        <div className="pagination-controls">
+                                            <Button
+                                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                                disabled={currentPage === 1}
+                                            >
+                                                上一页
+                                            </Button>
+                                            <span>第 {currentPage} 页 / 共 {totalPages} 页</span>
+                                            <Button
+                                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                                disabled={currentPage === totalPages}
+                                            >
+                                                下一页
+                                            </Button>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     ) : (
