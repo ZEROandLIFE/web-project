@@ -1,40 +1,48 @@
-import React, { useState, useEffect, useRef, }from 'react';
-import type{ChangeEvent} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import { createShow, getAllShows, createComment, getComments } from '../services/show';
-import type{Comment,Show} from '../services/show';
+import type { Comment, Show } from '../services/show';
 import { fetchCurrentUser } from '../services/api';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import Textarea from '../components/common/Textarea';
 import './showPage.css';
 
+/**
+ * 展示页面组件，用于显示用户分享的内容和评论
+ */
 const ShowPage: React.FC = () => {
-    const [shows, setShows] = useState<Show[]>([]);
-    const [comments, setComments] = useState<Record<number, Comment[]>>({});
+    // 状态定义
+    const [shows, setShows] = useState<Show[]>([]); // 所有分享内容列表
+    const [comments, setComments] = useState<Record<number, Comment[]>>({}); // 评论数据，按showId分组
     const [newShow, setNewShow] = useState({
-        description: '',
-        image: null as File | null,
-        preview: '' // 新增预览URL状态
+        description: '', // 新分享的描述
+        image: null as File | null, // 上传的图片文件
+        preview: '' // 图片预览URL
     });
-    const [newComments, setNewComments] = useState<Record<number, string>>({});
+    const [newComments, setNewComments] = useState<Record<number, string>>({}); // 新评论内容，按showId分组
     const [currentUser, setCurrentUser] = useState<{
         id: number;
         username: string;
-        avatar?: string; // 改为支持File类型
-    } | null>(null);
-    const [loading, setLoading] = useState(true);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    // 处理图片选择
+        avatar?: string;
+    } | null>(null); // 当前登录用户信息
+    const [loading, setLoading] = useState(true); // 数据加载状态
+    const fileInputRef = useRef<HTMLInputElement>(null); // 文件输入框的ref
+
+    /**
+     * 处理图片选择变化
+     * @param e - 输入变化事件
+     */
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            // 检查文件类型
+            // 验证文件类型
             if (!file.type.startsWith('image/')) {
                 alert('请上传图片文件');
                 return;
             }
 
-            // 创建预览URL
+            // 创建预览URL并更新状态
             const previewUrl = URL.createObjectURL(file);
             setNewShow({
                 ...newShow,
@@ -43,7 +51,8 @@ const ShowPage: React.FC = () => {
             });
         }
     };
-    // 组件卸载时释放预览URL
+
+    // 组件卸载时释放预览URL内存
     useEffect(() => {
         return () => {
             if (newShow.preview) {
@@ -52,12 +61,17 @@ const ShowPage: React.FC = () => {
         };
     }, [newShow.preview]);
 
+    /**
+     * 初始化数据获取
+     */
     useEffect(() => {
         const fetchData = async () => {
             try {
+                // 获取当前用户信息
                 const user = await fetchCurrentUser();
                 setCurrentUser(user);
 
+                // 获取所有分享内容
                 const showsData = await getAllShows();
                 setShows(showsData);
 
@@ -78,6 +92,9 @@ const ShowPage: React.FC = () => {
         fetchData();
     }, []);
 
+    /**
+     * 创建新的分享内容
+     */
     const handleCreateShow = async () => {
         if (!currentUser || !newShow.description) return;
 
@@ -86,46 +103,53 @@ const ShowPage: React.FC = () => {
         if (newShow.image) {
             formData.append('image', newShow.image);
         }
-        // 添加用户头像
-        if (currentUser.avatar) {
-            formData.append('userAvatar', currentUser.avatar);
-        }
 
         try {
+            // 调用API创建分享
             const createdShow = await createShow(formData);
             setShows([createdShow, ...shows]);
+            // 重置表单
             setNewShow({ description: '', image: null, preview: '' });
         } catch (error) {
             console.error('Error creating show:', error);
         }
     };
 
+    /**
+     * 创建新的评论
+     * @param showId - 目标分享内容的ID
+     */
     const handleCreateComment = async (showId: number) => {
         if (!currentUser || !newComments[showId]) return;
 
         try {
+            // 调用API创建评论
             const createdComment = await createComment({
                 showId,
                 content: newComments[showId]
             });
 
+            // 更新评论列表
             setComments(prev => ({
                 ...prev,
                 [showId]: [...(prev[showId] || []), createdComment]
             }));
 
+            // 清空当前评论输入框
             setNewComments(prev => ({ ...prev, [showId]: '' }));
         } catch (error) {
             console.error('Error creating comment:', error);
         }
     };
 
+    // 加载状态显示
     if (loading) {
         return <div>Loading...</div>;
     }
 
     return (
         <div className="show-page">
+            {/* 创建新分享的表单 */}
             {currentUser && (
                 <div className="create-show">
                     <Textarea
@@ -134,6 +158,7 @@ const ShowPage: React.FC = () => {
                         onChange={(e) => setNewShow({ ...newShow, description: e.target.value })}
                     />
                     <div className="image-upload">
+                        {/* 隐藏的文件输入框 */}
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -144,6 +169,7 @@ const ShowPage: React.FC = () => {
                         <Button onClick={() => fileInputRef.current?.click()}>
                             选择图片
                         </Button>
+                        {/* 图片预览区域 */}
                         {newShow.preview && (
                             <div className="image-preview">
                                 <img
@@ -153,7 +179,7 @@ const ShowPage: React.FC = () => {
                                 />
                                 <Button
                                     variant="text"
-                                    onClick={() => setNewShow({...newShow, image: null, preview: ''})}
+                                    onClick={() => setNewShow({ ...newShow, image: null, preview: '' })}
                                 >
                                     删除
                                 </Button>
@@ -164,9 +190,11 @@ const ShowPage: React.FC = () => {
                 </div>
             )}
 
+            {/* 分享内容列表 */}
             <div className="shows-list">
                 {shows.map(show => (
                     <div key={show.showId} className="show-item">
+                        {/* 分享头部信息 */}
                         <div className="show-header">
                             <img
                                 src={show.userAvatar || 'default-avatar.png'}
@@ -179,6 +207,7 @@ const ShowPage: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* 分享内容 */}
                         <div className="show-content">
                             <p>{show.description}</p>
                             {show.imageUrl && (
@@ -186,7 +215,9 @@ const ShowPage: React.FC = () => {
                             )}
                         </div>
 
+                        {/* 评论区域 */}
                         <div className="comments-section">
+                            {/* 评论列表 */}
                             <div className="comments-list">
                                 {comments[show.showId]?.map(comment => (
                                     <div key={comment.commentId} className="comment">
@@ -206,6 +237,7 @@ const ShowPage: React.FC = () => {
                                 ))}
                             </div>
 
+                            {/* 添加新评论 */}
                             {currentUser && (
                                 <div className="add-comment">
                                     <Input

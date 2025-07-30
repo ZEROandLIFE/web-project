@@ -8,18 +8,26 @@ import Button from '../components/common/Button';
 import './OrderPage.css';
 import { fetchCurrentUser } from "../services/api.ts";
 
+/**
+ * 订单管理页面组件
+ * 支持查看全部订单、作为卖家或买家的订单，并提供排序和分页功能
+ */
 const OrderPage: React.FC = () => {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [viewMode, setViewMode] = useState<'all' | 'seller' | 'buyer'>('all');
-    const [sortBy, setSortBy] = useState<'date' | 'price'>('date');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-    const [currentUser, setCurrentUser] = useState<{ id: number } | null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const itemsPerPage = 10;
+    // 状态定义
+    const [orders, setOrders] = useState<Order[]>([]); // 订单列表
+    const [loading, setLoading] = useState(false);     // 加载状态
+    const [error, setError] = useState('');           // 错误信息
+    const [viewMode, setViewMode] = useState<'all' | 'seller' | 'buyer'>('all'); // 查看模式
+    const [sortBy, setSortBy] = useState<'date' | 'price'>('date'); // 排序字段
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // 排序方向
+    const [currentUser, setCurrentUser] = useState<{ id: number } | null>(null); // 当前用户
+    const [currentPage, setCurrentPage] = useState(1); // 当前页码
+    const [totalPages, setTotalPages] = useState(1);   // 总页数
+    const itemsPerPage = 10;                          // 每页显示数量
 
+    /**
+     * 获取订单数据
+     */
     useEffect(() => {
         const fetchOrders = async () => {
             const user = await fetchCurrentUser();
@@ -29,6 +37,7 @@ const OrderPage: React.FC = () => {
             setError('');
             try {
                 let response;
+                // 根据查看模式获取不同维度的订单
                 if (viewMode === 'seller') {
                     response = await getOrdersAsSeller();
                 } else if (viewMode === 'buyer') {
@@ -37,7 +46,7 @@ const OrderPage: React.FC = () => {
                     response = await getMyOrders();
                 }
 
-                // 排序
+                // 排序处理
                 const sortedOrders = [...response.orders].sort((a, b) => {
                     if (sortBy === 'date') {
                         return sortOrder === 'desc'
@@ -63,20 +72,33 @@ const OrderPage: React.FC = () => {
         fetchOrders();
     }, [viewMode, sortBy, sortOrder]);
 
+    /**
+     * 切换查看模式
+     * @param mode 查看模式 ('all' | 'seller' | 'buyer')
+     */
     const handleViewModeChange = (mode: 'all' | 'seller' | 'buyer') => {
         setViewMode(mode);
     };
 
+    /**
+     * 切换排序方式
+     * @param type 排序字段 ('date' | 'price')
+     */
     const handleSortChange = (type: 'date' | 'price') => {
         if (sortBy === type) {
+            // 切换排序方向
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
+            // 切换排序字段，默认降序
             setSortBy(type);
             setSortOrder('desc');
         }
     };
 
-    // 获取当前页的订单
+    /**
+     * 获取当前页的订单数据
+     * @returns 当前页的订单数组
+     */
     const getCurrentOrders = () => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
@@ -87,9 +109,12 @@ const OrderPage: React.FC = () => {
         <div className="order-container">
             <h1 className="order-title">我的订单</h1>
 
+            {/* 错误提示 */}
             {error && <Alert type="error" message={error} />}
 
+            {/* 控制区域 */}
             <div className="order-controls">
+                {/* 查看模式切换 */}
                 <div className="view-mode">
                     <Button
                         variant={viewMode === 'all' ? 'primary' : 'secondary'}
@@ -111,6 +136,7 @@ const OrderPage: React.FC = () => {
                     </Button>
                 </div>
 
+                {/* 排序选项 */}
                 <div className="sort-options">
                     <span>排序方式：</span>
                     <Button
@@ -130,6 +156,7 @@ const OrderPage: React.FC = () => {
                 </div>
             </div>
 
+            {/* 订单列表 */}
             {loading ? (
                 <div className="loading">加载中...</div>
             ) : (
@@ -138,6 +165,7 @@ const OrderPage: React.FC = () => {
                         <div className="no-orders">暂无订单</div>
                     ) : (
                         <>
+                            {/* 订单表格 */}
                             <table className="order-table">
                                 <thead>
                                 <tr>
@@ -157,6 +185,7 @@ const OrderPage: React.FC = () => {
                                         <td>{order.itemName}</td>
                                         <td>¥{order.price}</td>
                                         <td>
+                                            {/* 根据查看模式显示交易类型 */}
                                             {viewMode === 'all' && currentUser ? (
                                                 order.sellerId === currentUser.id ? '卖出' : '买入'
                                             ) : viewMode === 'seller' ? '卖出' : '买入'}
@@ -166,6 +195,8 @@ const OrderPage: React.FC = () => {
                                 ))}
                                 </tbody>
                             </table>
+
+                            {/* 分页控制 */}
                             {totalPages > 1 && (
                                 <div className="pagination-controls">
                                     <Button

@@ -1,10 +1,13 @@
-import React, { useState, useRef, useEffect,type ChangeEvent } from 'react';
+import React, { useState, useRef, useEffect, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Alert from '../common/Alert';
 import { register } from '../../services/beforeLogin.ts';
 
+/**
+ * 注册表单数据类型定义
+ */
 interface FormData {
     username: string;
     phone: string;
@@ -15,12 +18,19 @@ interface FormData {
     avatarPreview: string | null;
 }
 
+/**
+ * 用户注册表单组件
+ */
 const RegisterForm: React.FC = () => {
+    // 设置页面标题
     useEffect(() => {
         document.title = '用户注册 - 盲盒平台';
     }, []);
+
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // 表单数据状态
     const [formData, setFormData] = useState<FormData>({
         username: '',
         phone: '',
@@ -30,12 +40,19 @@ const RegisterForm: React.FC = () => {
         avatar: null,
         avatarPreview: null,
     });
+
+    // 错误提示、成功提示和加载状态
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
+    /**
+     * 处理普通输入框变化
+     * @param e - 输入框变化事件
+     */
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+
         // 手机号特殊处理 - 只允许数字
         if (name === 'phone') {
             const numericValue = value.replace(/\D/g, '');
@@ -45,12 +62,17 @@ const RegisterForm: React.FC = () => {
             }));
             return;
         }
+
         setFormData(prev => ({
             ...prev,
             [name]: value,
         }));
     };
 
+    /**
+     * 处理头像文件选择变化
+     * @param e - 文件输入变化事件
+     */
     const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
@@ -61,6 +83,7 @@ const RegisterForm: React.FC = () => {
                 return;
             }
 
+            // 读取文件并预览
             const reader = new FileReader();
             reader.onloadend = () => {
                 setFormData(prev => ({
@@ -73,6 +96,9 @@ const RegisterForm: React.FC = () => {
         }
     };
 
+    /**
+     * 重置表单
+     */
     const handleReset = () => {
         setFormData({
             username: '',
@@ -84,18 +110,24 @@ const RegisterForm: React.FC = () => {
             avatarPreview: null,
         });
         setError(null);
+
+        // 重置文件输入
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     };
 
+    /**
+     * 处理表单提交
+     * @param e - 表单提交事件
+     */
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
         setSuccess(null);
 
-        // 验证逻辑
+        // 表单验证
         if (formData.password !== formData.confirmPassword) {
             setError('两次输入的密码不一致');
             setLoading(false);
@@ -109,7 +141,7 @@ const RegisterForm: React.FC = () => {
         }
 
         try {
-            // 创建FormData对象用于文件上传
+            // 准备表单数据
             const formDataToSend = new FormData();
             formDataToSend.append('username', formData.username);
             formDataToSend.append('phone', formData.phone);
@@ -118,14 +150,17 @@ const RegisterForm: React.FC = () => {
             if (formData.avatar) {
                 formDataToSend.append('avatar', formData.avatar);
             }
-            console.log(formData.avatar);
+
+            // 调用注册API
             await register(
                 formData.username,
                 formData.password,
                 formData.phone,
-                formData.avatar || undefined, // 确保这里传递的是File对象或undefined
+                formData.avatar || undefined,
                 formData.address
             );
+
+            // 注册成功处理
             setSuccess('注册成功！即将跳转到登录页面...');
             setTimeout(() => {
                 navigate('/login');
@@ -139,9 +174,11 @@ const RegisterForm: React.FC = () => {
 
     return (
         <form onSubmit={handleSubmit} className="auth-form">
+            {/* 状态提示 */}
             {error && <Alert type="error" message={error} />}
             {success && <Alert type="success" message={success} />}
 
+            {/* 表单输入字段 */}
             <Input
                 label="用户名"
                 type="text"
@@ -189,6 +226,7 @@ const RegisterForm: React.FC = () => {
                 required
             />
 
+            {/* 头像上传 */}
             <div className="input-group">
                 <label className="input-label">头像</label>
                 <input
@@ -209,6 +247,7 @@ const RegisterForm: React.FC = () => {
                 )}
             </div>
 
+            {/* 表单操作按钮 */}
             <div className="form-actions">
                 <Button
                     type="button"

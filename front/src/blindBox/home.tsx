@@ -5,14 +5,23 @@ import { getAllBoxes } from '.././services/box';
 import type { Box } from '.././services/box.ts';
 import './home.css';
 
+/**
+ * 盲盒商城首页组件
+ * 展示所有盲盒列表，提供搜索功能，并显示随机广告盲盒
+ */
 const Home: React.FC = () => {
-    const [blindBoxes, setBlindBoxes] = useState<Box[]>([]);
-    const [filteredBoxes, setFilteredBoxes] = useState<Box[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [adBox, setAdBox] = useState<Box | null>(null);
-    const navigate = useNavigate();
+    // 状态管理
+    const [blindBoxes, setBlindBoxes] = useState<Box[]>([]); // 所有盲盒数据
+    const [filteredBoxes, setFilteredBoxes] = useState<Box[]>([]); // 过滤后的盲盒数据
+    const [loading, setLoading] = useState(true); // 加载状态
+    const [error, setError] = useState(''); // 错误信息
+    const [adBox, setAdBox] = useState<Box | null>(null); // 广告盲盒
+    const navigate = useNavigate(); // 路由导航
 
+    /**
+     * 初始化数据获取
+     * 页面加载时获取所有盲盒数据并设置广告
+     */
     useEffect(() => {
         document.title = '盲盒商城';
         const fetchBoxes = async () => {
@@ -35,23 +44,34 @@ const Home: React.FC = () => {
         fetchBoxes();
     }, []);
 
-    // 随机获取一个盲盒
+    /**
+     * 从盲盒数组中随机获取一个盲盒
+     * @param boxes - 盲盒数组
+     * @returns 随机盲盒对象
+     */
     const getRandomBox = (boxes: Box[]): Box => {
         const randomIndex = Math.floor(Math.random() * boxes.length);
         return boxes[randomIndex];
     };
 
-    // 广告轮播效果
+    /**
+     * 广告轮播效果
+     * 每5秒切换一次广告盲盒
+     */
     useEffect(() => {
         if (blindBoxes.length === 0) return;
 
         const interval = setInterval(() => {
             setAdBox(getRandomBox(blindBoxes));
-        }, 5000); // 每5秒切换一次广告
+        }, 5000);
 
         return () => clearInterval(interval);
     }, [blindBoxes]);
 
+    /**
+     * 处理搜索功能
+     * @param searchTerm - 搜索关键词
+     */
     const handleSearch = (searchTerm: string) => {
         if (!searchTerm.trim()) {
             setFilteredBoxes(blindBoxes);
@@ -64,29 +84,43 @@ const Home: React.FC = () => {
         setFilteredBoxes(filtered);
     };
 
+    /**
+     * 处理盲盒点击事件
+     * 导航到盲盒详情页
+     * @param boxId - 盲盒ID
+     */
     const handleBoxClick = (boxId: string) => {
         navigate(`/boxdetail/${boxId}`);
     };
 
+    /**
+     * 处理广告盲盒点击事件
+     * 导航到盲盒详情页
+     * @param boxId - 盲盒ID
+     */
     const handleAdClick = (boxId: string) => {
         navigate(`/boxdetail/${boxId}`);
     };
 
+    // 加载状态显示
     if (loading) {
         return <div className="home-loading">加载中...</div>;
     }
 
+    // 错误状态显示
     if (error) {
         return <div className="home-error">{error}</div>;
     }
 
     return (
         <div className="home-container">
+            {/* 页面标题 */}
             <h1 className="home-title">盲盒商城</h1>
 
+            {/* 搜索表单 */}
             <HomeForm onSearch={handleSearch} />
 
-            {/* 广告部分 */}
+            {/* 广告区域 */}
             {adBox && (
                 <div
                     className="home-ad-container"
@@ -120,6 +154,7 @@ const Home: React.FC = () => {
                 </div>
             )}
 
+            {/* 盲盒列表 */}
             <div className="home-boxes-grid">
                 {filteredBoxes.length > 0 ? (
                     filteredBoxes.map(box => (

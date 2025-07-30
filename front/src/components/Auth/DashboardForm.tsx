@@ -6,8 +6,9 @@ import Alert from '../common/Alert';
 import Modal from '../common/Modal';
 import Textarea from '../common/Textarea';
 import '../../authPages/Dashboard.css';
-import { fetchCurrentUser, getBalance, rechargeMoney,updateProfile,changePassword,setAdminRole } from '../../services/api';
+import { fetchCurrentUser, getBalance, rechargeMoney, updateProfile, changePassword, setAdminRole } from '../../services/api';
 
+// 定义用户数据接口
 interface UserData {
     username: string;
     address?: string;
@@ -17,18 +18,30 @@ interface UserData {
     id: number;
 }
 
+/**
+ * 用户仪表盘组件
+ * 显示用户信息、余额、并提供充值、修改信息等功能
+ */
 const DashboardForm: React.FC = () => {
     const navigate = useNavigate();
+
+    // 用户数据状态
     const [userData, setUserData] = useState<UserData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error] = useState<string | null>(null);
+
+    // 余额状态
     const [balance, setBalance] = useState<number>(0);
+
+    // 模态框显示状态
     const [showRechargeModal, setShowRechargeModal] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [showInviteModal, setShowInviteModal] = useState(false);
+
+    // 表单数据状态
     const [rechargeAmount, setRechargeAmount] = useState('');
     const [inviteCode, setInviteCode] = useState('');
-    const [showInviteModal, setShowInviteModal] = useState(false);
     const [newProfile, setNewProfile] = useState({
         username: '',
         address: ''
@@ -37,13 +50,17 @@ const DashboardForm: React.FC = () => {
         password: '',
         confirmPassword: ''
     });
+
+    // 提示信息状态
     const [alert, setAlert] = useState<{
         type: 'error' | 'success' | 'warning' | 'info';
         message: string;
     } | null>(null);
 
+    // 加载用户数据
     useEffect(() => {
         document.title = '个人信息 - 盲盒平台';
+
         const loadUserData = async () => {
             try {
                 const data = await fetchCurrentUser();
@@ -56,10 +73,12 @@ const DashboardForm: React.FC = () => {
                         role: data.role,
                         id: data.id
                     });
-                    // 获取余额
+
+                    // 获取用户余额
                     const balanceData = await getBalance();
                     setBalance(balanceData.balance);
                 } else {
+                    // 用户数据无效，重定向到登录页
                     localStorage.removeItem('token');
                     navigate('/login');
                 }
@@ -72,6 +91,7 @@ const DashboardForm: React.FC = () => {
             }
         };
 
+        // 检查登录状态
         if (!localStorage.getItem('token')) {
             navigate('/login');
             return;
@@ -80,11 +100,17 @@ const DashboardForm: React.FC = () => {
         loadUserData();
     }, [navigate]);
 
+    /**
+     * 处理用户登出
+     */
     const handleLogout = () => {
         localStorage.removeItem('token');
         navigate('/login');
     };
 
+    /**
+     * 处理账户充值
+     */
     const handleRecharge = async () => {
         const amount = parseFloat(rechargeAmount);
         if (isNaN(amount) || amount <= 0) {
@@ -109,6 +135,9 @@ const DashboardForm: React.FC = () => {
         }
     };
 
+    /**
+     * 处理个人信息更新
+     */
     const handleUpdateProfile = async () => {
         try {
             const result = await updateProfile({
@@ -133,14 +162,14 @@ const DashboardForm: React.FC = () => {
             }
         }
     };
+
+    /**
+     * 处理管理员邀请码提交
+     */
     const handleInviteCodeSubmit = async () => {
         if (inviteCode.trim() === '114514') {
             try {
-                console.log(userData);
-                const result = await setAdminRole(
-                    (userData as any).id
-                );
-                console.log(result);
+                const result = await setAdminRole(userData!.id);
                 if (result.success) {
                     setAlert({ type: 'success', message: '您已成为管理员！' });
                     // 刷新页面获取最新数据
@@ -157,8 +186,13 @@ const DashboardForm: React.FC = () => {
         }
         setShowInviteModal(false);
     };
+
+    /**
+     * 处理密码修改
+     */
     const handleUpdatePassword = async () => {
         try {
+            // 验证密码一致性
             if (newPassword.password !== newPassword.confirmPassword) {
                 setAlert({ type: 'error', message: '两次输入的密码不一致' });
                 return;
@@ -173,13 +207,12 @@ const DashboardForm: React.FC = () => {
                 setAlert({ type: 'success', message: result.message });
                 setShowPasswordModal(false);
 
-                // 可以在这里添加跳转到登录页的逻辑
+                // 修改成功后跳转到登录页
                 setTimeout(() => {
                     setAlert(null);
                     localStorage.removeItem('token');
-                    navigate('/login'); // 确保 navigate 已正确导入
+                    navigate('/login');
                 }, 2000);
-
             }
         } catch (error: unknown) {
             if (error instanceof Error) {
@@ -190,20 +223,24 @@ const DashboardForm: React.FC = () => {
         }
     };
 
+    // 加载状态显示
     if (loading) {
         return <div className="dashboard-container">加载中...</div>;
     }
 
+    // 错误状态显示
     if (error) {
         return <div className="dashboard-container">{error}</div>;
     }
 
+    // 用户数据未加载完成
     if (!userData) {
         return <div className="dashboard-container">未找到用户数据</div>;
     }
 
     return (
         <div className="dashboard-container">
+            {/* 全局提示组件 */}
             {alert && (
                 <Alert
                     type={alert.type}
@@ -213,6 +250,7 @@ const DashboardForm: React.FC = () => {
                 />
             )}
 
+            {/* 用户头像区域 */}
             <div className="dashboard-header">
                 <div className="dashboard-avatar-container">
                     {userData.avatar ? (
@@ -227,6 +265,7 @@ const DashboardForm: React.FC = () => {
                 </div>
             </div>
 
+            {/* 用户信息区域 */}
             <div className="dashboard-info">
                 <h2 className="dashboard-username">用户名：{userData.username}</h2>
                 {userData.address && (
@@ -235,6 +274,7 @@ const DashboardForm: React.FC = () => {
                 <p className="dashboard-phone">手机号：{userData.phone}</p>
                 <p className="dashboard-balance">账户余额：¥{balance}</p>
                 <p className="dashboard-balance">用户角色：{userData.role === 'admin' ? '管理员' : '普通用户'}</p>
+
                 {/* 充值按钮 */}
                 <div className="dashboard-button-row">
                     <Button
@@ -246,6 +286,7 @@ const DashboardForm: React.FC = () => {
                 </div>
             </div>
 
+            {/* 普通用户显示邀请码输入按钮 */}
             {userData.role === 'user' && (
                 <div className="dashboard-button-row">
                     <Button
@@ -256,7 +297,8 @@ const DashboardForm: React.FC = () => {
                     </Button>
                 </div>
             )}
-            {/* 修改信息按钮 */}
+
+            {/* 操作按钮区域 */}
             <div className="dashboard-buttons">
                 <div className="dashboard-button-row">
                     <Button
@@ -271,18 +313,22 @@ const DashboardForm: React.FC = () => {
                     >
                         修改密码
                     </Button>
+
+                    {/* 管理员特有功能 */}
                     {userData.role === 'admin' && (
                         <div className="dashboard-button-row">
                             <Button
-                                onClick={()=>navigate('/adminorder')} variant="danger">
+                                onClick={()=>navigate('/adminorder')}
+                                variant="danger"
+                            >
                                 管理员订单管理系统
                             </Button>
                         </div>
                     )}
                 </div>
 
+                {/* 登出按钮 */}
                 <div className="dashboard-button-row">
-
                     <Button
                         onClick={handleLogout}
                         variant="text"
@@ -367,6 +413,7 @@ const DashboardForm: React.FC = () => {
                     </div>
                 </Modal>
             )}
+
             {/* 邀请码模态框 */}
             {showInviteModal && (
                 <Modal
@@ -398,6 +445,7 @@ const DashboardForm: React.FC = () => {
                     </div>
                 </Modal>
             )}
+
             {/* 修改密码模态框 */}
             {showPasswordModal && (
                 <Modal

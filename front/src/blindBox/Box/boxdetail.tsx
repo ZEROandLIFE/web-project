@@ -1,41 +1,55 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getBoxById, deleteBox, purchaseBox} from '../../services/box';
-import type{Box, BoxItem } from '../../services/box';
+import { getBoxById, deleteBox, purchaseBox } from '../../services/box';
+import type { Box, BoxItem } from '../../services/box';
 import { fetchCurrentUser } from '../../services/api';
 import Button from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
 import './boxdetail.css';
 
+/**
+ * 盲盒详情页面组件
+ */
 const BoxDetail: React.FC = () => {
+    // 路由参数和导航
     const { boxId } = useParams<{ boxId: string }>();
-    const [box, setBox] = useState<Box | null>(null);
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const navigate = useNavigate();
-    const [currentUserRole, setCurrentUserRole] = useState<'user' | 'admin'>('user');
-    const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+
+    // 组件状态
+    const [box, setBox] = useState<Box | null>(null); // 当前盲盒数据
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null); // 当前用户ID
+    const [loading, setLoading] = useState(true); // 加载状态
+    const [error, setError] = useState(''); // 错误信息
+    const [currentUserRole, setCurrentUserRole] = useState<'user' | 'admin'>('user'); // 用户角色
+    const [showPurchaseModal, setShowPurchaseModal] = useState(false); // 购买确认模态框显示状态
+
+    // 购买结果状态
     const [purchaseResult, setPurchaseResult] = useState<{
         item?: BoxItem;
         remaining?: number;
         message?: string;
     } | null>(null);
 
-    // 新增动画相关状态
-    const [isRolling, setIsRolling] = useState(false);
-    const [rollingItems, setRollingItems] = useState<BoxItem[]>([]);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const animationRef = useRef<number>();
-    const animationDuration = 3000; // 动画持续时间3秒
+    // 动画相关状态
+    const [isRolling, setIsRolling] = useState(false); // 是否正在执行开盒动画
+    const [rollingItems, setRollingItems] = useState<BoxItem[]>([]); // 动画中滚动的物品列表
+    const containerRef = useRef<HTMLDivElement>(null); // 动画容器DOM引用
+    const animationRef = useRef<number>(); // 动画帧引用
+    const animationDuration = 3000; // 动画持续时间(毫秒)
 
+    /**
+     * 初始化数据加载
+     */
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const boxData = await getBoxById(boxId!);
-                setBox(boxData);
+                // 并行获取盲盒数据和当前用户信息
+                const [boxData, user] = await Promise.all([
+                    getBoxById(boxId!),
+                    fetchCurrentUser()
+                ]);
 
-                const user = await fetchCurrentUser();
+                setBox(boxData);
                 setCurrentUserId(user.id);
                 setCurrentUserRole(user.role);
             } catch (err) {
@@ -48,7 +62,7 @@ const BoxDetail: React.FC = () => {
 
         fetchData();
 
-        // 清除动画
+        // 组件卸载时清理动画
         return () => {
             if (animationRef.current) {
                 cancelAnimationFrame(animationRef.current);
@@ -56,8 +70,12 @@ const BoxDetail: React.FC = () => {
         };
     }, [boxId]);
 
+    /**
+     * 处理盲盒下架操作
+     */
     const handleTakeDown = async () => {
         if (!boxId) return;
+
         try {
             await deleteBox(boxId);
             alert('盲盒已成功下架');
@@ -68,10 +86,16 @@ const BoxDetail: React.FC = () => {
         }
     };
 
+    /**
+     * 显示购买确认模态框
+     */
     const handlePurchase = async () => {
         setShowPurchaseModal(true);
     };
 
+    /**
+     * 确认购买盲盒
+     */
     const confirmPurchase = async () => {
         if (!boxId || !box) return;
 
@@ -81,47 +105,45 @@ const BoxDetail: React.FC = () => {
             const result = await purchaseBox(boxId);
 
             if (result.success) {
-                // 开始动画
+                // 开始开盒动画
                 startRollingAnimation(box.items, result.item);
-                setBox({
-                    ...box,
-                    boxNum: result.remaining
-                });
-                // 动画结束后设置结果
+
+                // 更新盲盒剩余数量
+                setBox(prev => prev ? { ...prev, boxNum: result.remaining } : null);
+
+                // 动画结束后显示结果
                 setTimeout(() => {
                     setPurchaseResult({
                         item: result.item,
                         remaining: result.remaining,
                         message: result.message
                     });
-                    setIsRolling(false); // 确保动画关闭
+                    setIsRolling(false);
 
                     // 更新盲盒数量显示
-                    setBox({
-                        ...box,
-                        boxNum: result.remaining
-                    });
+                    setBox(prev => prev ? { ...prev, boxNum: result.remaining } : null);
 
                     // 如果盲盒已空，跳转回首页
                     if (result.remaining === 0) {
-                        setTimeout(() => {
-                            navigate('/home');
-                        }, 2000);
+                        setTimeout(() => navigate('/home'), 2000);
                     }
                 }, animationDuration);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             stopRollingAnimation();
-            if (error.response) {
-                const { data } = error.response;
-                if (data.error === '余额不足') {
+
+            // 处理不同类型的错误
+            if (error instanceof Error && 'response' in error) {
+                const { data } = (error as { response?: { data?: { error?: string } } }).response || {};
+
+                if (data?.error === '余额不足') {
                     alert('购买失败: 余额不足，请充值');
                     navigate('/dashboard');
-                } else if (data.error === '该盲盒已无可用物品' || data.error === 'Box not found') {
+                } else if (data?.error === '该盲盒已无可用物品' || data?.error === 'Box not found') {
                     alert('购买失败: 盲盒已售罄');
                     navigate('/home');
                 } else {
-                    alert(`购买失败: ${data.error || '未知错误'}`);
+                    alert(`购买失败: ${data?.error || '未知错误'}`);
                 }
             } else {
                 alert('购买失败: 网络错误');
@@ -129,41 +151,49 @@ const BoxDetail: React.FC = () => {
         }
     };
 
-    // 开始滚动动画
+    /**
+     * 开始滚动动画
+     * @param items 盲盒包含的所有物品
+     * @param target 抽中的目标物品
+     */
     const startRollingAnimation = (items: BoxItem[], target: BoxItem) => {
         setIsRolling(true);
 
-        // 创建足够多的重复项以实现无限滚动效果
+        // 创建重复物品列表以实现无限滚动效果
         const repeatedItems = [...items, ...items, ...items, ...items, ...items];
         setRollingItems(repeatedItems);
 
-        // 等待状态更新和DOM渲染
+        // 等待状态更新和DOM渲染完成
         requestAnimationFrame(() => {
             const container = containerRef.current;
             if (!container) return;
 
+            // 重置滚动位置
             container.scrollLeft = 0;
 
             let startTime: number | null = null;
             const itemWidth = 120; // 每个物品的宽度(与CSS中一致)
 
-            // 找到目标位置
+            // 找到目标物品的位置
             const targetIndex = repeatedItems.findIndex(item =>
                 item.name === target.name && item.quantity === target.quantity
             );
             const targetScroll = (targetIndex - 2) * itemWidth; // 停在中间偏左2个位置
 
+            /**
+             * 动画帧处理函数
+             * @param timestamp 时间戳
+             */
             const animate = (timestamp: number) => {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
                 const progress = Math.min(elapsed / animationDuration, 1);
 
-                // 加速->减速效果
+                // 应用缓动效果
                 const easeProgress = easeOutQuad(progress);
 
-                // 当前滚动位置
-                const scrollPosition = easeProgress * (targetScroll + 1500); // 1000是额外滚动量
-                container.scrollLeft = scrollPosition;
+                // 计算当前滚动位置(添加额外滚动量增强效果)
+                container.scrollLeft = easeProgress * (targetScroll + 1500);
 
                 if (progress < 1) {
                     animationRef.current = requestAnimationFrame(animate);
@@ -177,12 +207,18 @@ const BoxDetail: React.FC = () => {
         });
     };
 
-    // 缓动函数 - 减速效果
+    /**
+     * 缓动函数 - 减速效果
+     * @param t 进度(0-1)
+     * @returns 缓动后的进度值
+     */
     const easeOutQuad = (t: number) => {
         return t * (2 - t);
     };
 
-    // 停止动画
+    /**
+     * 停止动画
+     */
     const stopRollingAnimation = () => {
         if (animationRef.current) {
             cancelAnimationFrame(animationRef.current);
@@ -190,20 +226,24 @@ const BoxDetail: React.FC = () => {
         setIsRolling(false);
     };
 
+    // 渲染加载状态
     if (loading) {
         return <div className="boxdetail-loading">加载中...</div>;
     }
 
+    // 渲染错误状态
     if (error) {
         return <div className="boxdetail-error">{error}</div>;
     }
 
+    // 渲染盲盒不存在状态
     if (!box) {
         return <div className="boxdetail-not-found">盲盒不存在</div>;
     }
 
     return (
         <div className="boxdetail-container">
+            {/* 盲盒头部信息 */}
             <div className="boxdetail-header">
                 <h1 className="boxdetail-title">{box.boxName}</h1>
                 <div className="boxdetail-actions">
@@ -219,7 +259,9 @@ const BoxDetail: React.FC = () => {
                 </div>
             </div>
 
+            {/* 盲盒内容 */}
             <div className="boxdetail-content">
+                {/* 盲盒图片 */}
                 <div className="boxdetail-image-section">
                     {box.boxAvatar ? (
                         <img
@@ -232,6 +274,7 @@ const BoxDetail: React.FC = () => {
                     )}
                 </div>
 
+                {/* 盲盒信息 */}
                 <div className="boxdetail-info-section">
                     <div className="boxdetail-meta">
                         <div className="boxdetail-meta-item">
@@ -244,6 +287,7 @@ const BoxDetail: React.FC = () => {
                         </div>
                     </div>
 
+                    {/* 盲盒描述 */}
                     {box.description && (
                         <div className="boxdetail-description">
                             <h3>盲盒描述</h3>
@@ -251,6 +295,7 @@ const BoxDetail: React.FC = () => {
                         </div>
                     )}
 
+                    {/* 包含物品列表 */}
                     <div className="boxdetail-items">
                         <h3>包含物品</h3>
                         <ul className="boxdetail-items-list">
@@ -292,7 +337,7 @@ const BoxDetail: React.FC = () => {
                 </Modal>
             )}
 
-            {/* 开盒动画 - 修改后的版本 */}
+            {/* 开盒动画 */}
             {isRolling && (
                 <div className="rolling-overlay">
                     <div className="rolling-container">
