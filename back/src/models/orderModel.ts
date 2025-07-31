@@ -3,8 +3,15 @@ import pool from '../config/database';
 import { Order, OrderInput, AdminOrderQuery, OrderStats } from '../types/order';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
+/**
+ * 订单数据模型类，处理与订单相关的数据库操作
+ */
 class OrderModel {
-    // 创建订单
+    /**
+     * 创建新订单
+     * @param orderData - 订单数据对象
+     * @returns 创建的订单详情
+     */
     async createOrder(orderData: OrderInput): Promise<Order> {
         const [result] = await pool.execute<ResultSetHeader>(
             `INSERT INTO orders 
@@ -23,7 +30,12 @@ class OrderModel {
         return this.getOrderById(result.insertId);
     }
 
-    // 根据ID获取订单
+    /**
+     * 根据订单ID获取订单详情
+     * @param orderId - 订单ID
+     * @returns 订单详情
+     * @throws 当订单不存在时抛出错误
+     */
     async getOrderById(orderId: number): Promise<Order> {
         const [rows] = await pool.execute<(Order & RowDataPacket)[]>(
             `SELECT * FROM orders WHERE orderId = ?`,
@@ -37,7 +49,11 @@ class OrderModel {
         return rows[0];
     }
 
-    // 获取用户所有订单（作为卖家或买家）
+    /**
+     * 获取用户的所有订单（作为卖家或买家）
+     * @param userId - 用户ID
+     * @returns 订单列表，按创建时间降序排列
+     */
     async getOrdersByUserId(userId: number): Promise<Order[]> {
         const [rows] = await pool.execute<(Order & RowDataPacket)[]>(
             `SELECT * FROM orders 
@@ -49,7 +65,11 @@ class OrderModel {
         return rows;
     }
 
-    // 获取卖家订单
+    /**
+     * 获取用户作为卖家的所有订单
+     * @param sellerId - 卖家用户ID
+     * @returns 订单列表，按创建时间降序排列
+     */
     async getSellerOrders(sellerId: number): Promise<Order[]> {
         const [rows] = await pool.execute<(Order & RowDataPacket)[]>(
             `SELECT * FROM orders 
@@ -61,7 +81,11 @@ class OrderModel {
         return rows;
     }
 
-    // 获取买家订单
+    /**
+     * 获取用户作为买家的所有订单
+     * @param buyerId - 买家用户ID
+     * @returns 订单列表，按创建时间降序排列
+     */
     async getBuyerOrders(buyerId: number): Promise<Order[]> {
         const [rows] = await pool.execute<(Order & RowDataPacket)[]>(
             `SELECT * FROM orders 
@@ -73,7 +97,11 @@ class OrderModel {
         return rows;
     }
 
-    // 管理员获取所有订单（新增方法）
+    /**
+     * 管理员获取所有订单（支持分页、筛选、排序）
+     * @param query - 查询参数对象
+     * @returns 包含订单列表、总数、分页信息的对象
+     */
     async getAdminAllOrders(query: AdminOrderQuery): Promise<{
         orders: Order[];
         total: number;
@@ -82,7 +110,7 @@ class OrderModel {
     }> {
         const connection = await pool.getConnection();
         try {
-            // 1. 定义排序字段映射
+            // 排序字段映射（防止SQL注入）
             const sortFieldMap: Record<string, string> = {
                 'date': 'createdAt',
                 'price': 'price',
@@ -94,11 +122,11 @@ class OrderModel {
             const pageSize = Number(query.pageSize) || 20;
             const offset = (page - 1) * pageSize; 
 
-            // 2. 构建查询
+            // 构建基础查询语句
             let baseQuery = `FROM orders WHERE 1=1`;
             const params: any[] = [];
 
-            // 4. 添加筛选条件（确保所有参数都有值）
+            // 添加筛选条件
             if (query.search) {
                 baseQuery += ` AND (boxName LIKE ? OR itemName LIKE ?)`;
                 params.push(`%${query.search}%`, `%${query.search}%`);
@@ -128,29 +156,24 @@ class OrderModel {
                 params.push(new Date(query.endDate));
             }
 
-            // 5. 获取总数
+            // 获取总数
             const [totalRes] = await connection.execute<RowDataPacket[]>(
                 `SELECT COUNT(*) as total ${baseQuery}`,
                 params
             );
             const total = totalRes[0].total;
 
-            // 6. 获取订单数据（关键修改点）
-            const mainQuery = `
-                SELECT * 
-                ${baseQuery} 
-                ORDER BY ${safeSortBy} ${query.sortOrder} 
-                LIMIT ${pageSize} OFFSET ${offset}  
-            `;
-            const mainParams = [...params, pageSize, offset];
-            
-            const [rows] = await connection.execute<(Order & RowDataPacket)[]>(mainQuery, mainParams);
+            // 获取分页数据
+            const [rows] = await connection.execute<(Order & RowDataPacket)[]>(
+                `SELECT * ${baseQuery} ORDER BY ${safeSortBy} ${query.sortOrder} LIMIT ? OFFSET ?`,
+                [...params, pageSize, offset]
+            );
             
             return {
                 orders: rows,
                 total,
-                page: query.page,
-                pageSize: query.pageSize
+                page,
+                pageSize
             };
         } catch (error) {
             console.error('数据库错误:', error);
@@ -160,9 +183,13 @@ class OrderModel {
         }
     }
 
-    // 订单统计方法（新增方法）
+    /**
+     * 获取订单统计信息
+     * @param period - 统计周期（day/week/month）
+     * @returns 包含各种统计数据的对象
+     */
     async getOrderStats(period: string): Promise<OrderStats> {
-        // 1. 基础统计
+        // 1. 获取基础统计数据
         const [baseStats] = await pool.execute<RowDataPacket[]>(`
             SELECT 
                 COUNT(*) as totalOrders,
@@ -171,7 +198,7 @@ class OrderModel {
             FROM orders
         `);
 
-        // 2. 趋势统计
+        // 2. 根据周期获取趋势数据
         let dateFormat: string;
         switch (period) {
             case 'day': dateFormat = '%Y-%m-%d'; break;
@@ -190,7 +217,7 @@ class OrderModel {
             ORDER BY date
         `, [dateFormat]);
 
-        // 3. 顶级卖家
+        // 3. 获取顶级卖家数据
         const [topSellers] = await pool.execute<RowDataPacket[]>(`
             SELECT 
                 sellerId as userId,
@@ -204,7 +231,7 @@ class OrderModel {
             LIMIT 5
         `);
 
-        // 4. 顶级买家
+        // 4. 获取顶级买家数据
         const [topBuyers] = await pool.execute<RowDataPacket[]>(`
             SELECT 
                 buyerId as userId,
@@ -218,6 +245,7 @@ class OrderModel {
             LIMIT 5
         `);
 
+        // 返回整合后的统计数据
         return {
             totalOrders: baseStats[0].totalOrders,
             totalRevenue: baseStats[0].totalRevenue || 0,

@@ -3,7 +3,19 @@ import { comparePassword } from '../utils/bcrypt';
 import { generateToken } from '../utils/jwt';
 import { LoginInput, LoginResponse } from '../types/login';
 
+/**
+ * 用户登录服务
+ * @class LoginService
+ * @description 处理用户登录相关业务逻辑
+ */
 class LoginService {
+    /**
+     * 用户登录方法
+     * @async
+     * @param {LoginInput} loginData - 用户登录输入数据
+     * @returns {Promise<LoginResponse>} 包含用户信息和token的登录响应数据
+     * @throws {Error} 当用户不存在或密码错误时抛出异常
+     */
     async login(loginData: LoginInput): Promise<LoginResponse> {
         const { username, password } = loginData;
         
@@ -19,13 +31,13 @@ class LoginService {
             throw new Error('密码错误');
         }
 
-        // 3. 生成token
+        // 3. 生成JWT token
         const token = generateToken({
             userId: user.id,
             username: user.username
         });
 
-        // 4. 返回响应数据
+        // 4. 构造响应数据（过滤敏感字段）
         return {
             token,
             user: {
