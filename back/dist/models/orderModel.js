@@ -3,10 +3,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// models/orderModel.ts
 const database_1 = __importDefault(require("../config/database"));
+/**
+ * 订单数据模型类，处理与订单相关的数据库操作
+ */
 class OrderModel {
-    // 创建订单
+    /**
+     * 创建新订单
+     * @param orderData - 订单数据对象
+     * @returns 创建的订单详情
+     */
     async createOrder(orderData) {
         const [result] = await database_1.default.execute(`INSERT INTO orders 
             (boxId, sellerId, buyerId, boxName, itemName, price) 
@@ -20,7 +26,12 @@ class OrderModel {
         ]);
         return this.getOrderById(result.insertId);
     }
-    // 根据ID获取订单
+    /**
+     * 根据订单ID获取订单详情
+     * @param orderId - 订单ID
+     * @returns 订单详情
+     * @throws 当订单不存在时抛出错误
+     */
     async getOrderById(orderId) {
         const [rows] = await database_1.default.execute(`SELECT * FROM orders WHERE orderId = ?`, [orderId]);
         if (rows.length === 0) {
@@ -28,28 +39,44 @@ class OrderModel {
         }
         return rows[0];
     }
-    // 获取用户所有订单（作为卖家或买家）
+    /**
+     * 获取用户的所有订单（作为卖家或买家）
+     * @param userId - 用户ID
+     * @returns 订单列表，按创建时间降序排列
+     */
     async getOrdersByUserId(userId) {
         const [rows] = await database_1.default.execute(`SELECT * FROM orders 
             WHERE sellerId = ? OR buyerId = ?
             ORDER BY createdAt DESC`, [userId, userId]);
         return rows;
     }
-    // 获取卖家订单
+    /**
+    * 获取用户作为卖家的所有订单
+    * @param sellerId - 卖家用户ID
+    * @returns 订单列表，按创建时间降序排列
+    */
     async getSellerOrders(sellerId) {
         const [rows] = await database_1.default.execute(`SELECT * FROM orders 
             WHERE sellerId = ?
             ORDER BY createdAt DESC`, [sellerId]);
         return rows;
     }
-    // 获取买家订单
+    /**
+     * 获取用户作为买家的所有订单
+     * @param buyerId - 买家用户ID
+     * @returns 订单列表，按创建时间降序排列
+     */
     async getBuyerOrders(buyerId) {
         const [rows] = await database_1.default.execute(`SELECT * FROM orders 
             WHERE buyerId = ?
             ORDER BY createdAt DESC`, [buyerId]);
         return rows;
     }
-    // 管理员获取所有订单（新增方法）
+    /**
+     * 管理员获取所有订单（支持分页、筛选、排序）
+     * @param query - 查询参数对象
+     * @returns 包含订单列表、总数、分页信息的对象
+     */
     async getAdminAllOrders(query) {
         const connection = await database_1.default.getConnection();
         try {
@@ -66,7 +93,7 @@ class OrderModel {
             // 2. 构建查询
             let baseQuery = `FROM orders WHERE 1=1`;
             const params = [];
-            // 4. 添加筛选条件（确保所有参数都有值）
+            // 4. 添加筛选条件
             if (query.search) {
                 baseQuery += ` AND (boxName LIKE ? OR itemName LIKE ?)`;
                 params.push(`%${query.search}%`, `%${query.search}%`);
@@ -98,7 +125,7 @@ class OrderModel {
             // 5. 获取总数
             const [totalRes] = await connection.execute(`SELECT COUNT(*) as total ${baseQuery}`, params);
             const total = totalRes[0].total;
-            // 6. 获取订单数据（关键修改点）
+            // 6. 获取订单数据
             const mainQuery = `
                 SELECT * 
                 ${baseQuery} 
@@ -122,7 +149,11 @@ class OrderModel {
             connection.release();
         }
     }
-    // 订单统计方法（新增方法）
+    /**
+    * 获取订单统计信息
+    * @param period - 统计周期（day/week/month）
+    * @returns 包含各种统计数据的对象
+    */
     async getOrderStats(period) {
         // 1. 基础统计
         const [baseStats] = await database_1.default.execute(`

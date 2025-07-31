@@ -5,22 +5,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = require("../utils/bcrypt");
+/**
+ * 用户注册服务
+ * @class RegisterService
+ * @description 处理用户注册相关业务逻辑，包括数据验证和用户创建
+ */
 class RegisterService {
+    /**
+     * 用户注册方法
+     * @async
+     * @param {UserInput} userData - 用户注册数据
+     * @returns {Promise<Object>} 创建成功的用户对象
+     * @throws {Error} 当用户名或手机号已存在时抛出异常
+     * @description
+     * 1. 验证用户名唯一性
+     * 2. 验证手机号唯一性
+     * 3. 加密密码
+     * 4. 创建新用户
+     */
     async register(userData) {
         const { username, phone, password } = userData;
-        // 检查用户名是否已存在
+        // 验证用户名唯一性
         const existingUser = await userModel_1.default.getUserByUsername(username);
         if (existingUser) {
             throw new Error('Username already exists');
         }
-        // 检查手机号是否已存在
+        // 验证手机号唯一性
         const existingPhone = await userModel_1.default.getUserByPhone(phone);
         if (existingPhone) {
             throw new Error('Phone number already exists');
         }
         // 加密密码
         const hashedPassword = await (0, bcrypt_1.hashPassword)(password);
-        // 创建用户
+        // 创建用户（使用扩展运算符保留其他用户数据）
         return userModel_1.default.createUser({
             ...userData,
             password: hashedPassword
