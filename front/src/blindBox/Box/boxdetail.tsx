@@ -34,7 +34,7 @@ const BoxDetail: React.FC = () => {
     const [isRolling, setIsRolling] = useState(false); // 是否正在执行开盒动画
     const [rollingItems, setRollingItems] = useState<BoxItem[]>([]); // 动画中滚动的物品列表
     const containerRef = useRef<HTMLDivElement>(null); // 动画容器DOM引用
-    const animationRef = useRef<number>(); // 动画帧引用
+    const animationRef = useRef<number | null>(null);// 动画帧引用
     const animationDuration = 3000; // 动画持续时间(毫秒)
 
     /**

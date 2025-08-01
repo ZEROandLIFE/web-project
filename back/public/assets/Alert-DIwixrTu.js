@@ -1,0 +1,1 @@
+import{j as s}from"./index-Dhmb56CU.js";const i=({type:a,message:r,className:t="",onClose:e})=>{const l=`alert alert-${a} ${t}`;return s.jsxs("div",{className:l,children:[s.jsx("div",{className:"alert-message",children:r}),e&&s.jsx("button",{className:"alert-close",onClick:e,children:"×"})]})};export{i as A};

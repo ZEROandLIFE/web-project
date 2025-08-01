@@ -1,0 +1,1 @@
+import{j as e}from"./index-Dhmb56CU.js";import"./Input-ChJNsZGx.js";const i=({label:a,id:s,...t})=>e.jsxs("div",{className:"input-group",children:[e.jsx("label",{htmlFor:s,className:"input-label",children:a}),e.jsx("textarea",{id:s,className:"input-field",...t})]});export{i as T};

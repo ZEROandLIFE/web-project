@@ -1,0 +1,1 @@
+import{j as a}from"./index-Dhmb56CU.js";const m=({children:t,fullWidth:s=!1,variant:n="primary",className:r="",...o})=>a.jsx("button",{className:`btn btn-${n} ${s?"btn-full":""} ${r}`,...o,children:t});export{m as B};

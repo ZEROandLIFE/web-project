@@ -1,0 +1,1 @@
+import{j as s}from"./index-Dhmb56CU.js";const n=({label:e,id:t,...l})=>s.jsxs("div",{className:"input-group",children:[s.jsx("label",{htmlFor:t,className:"input-label",children:e}),s.jsx("input",{id:t,className:"input-field",...l})]});export{n as I};
