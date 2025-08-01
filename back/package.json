@@ -2,12 +2,12 @@
   "name": "back",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
+   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    
-    "dev": "nodemon"
+    "build": "tsc && npm run bundle",
+    "bundle": "ncc build src\\bootstrap.ts -o dist",
+    "start": "set NODE_ENV=production&& node dist\\index.js",
+    "dev": "nodemon src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,8 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@midwayjs/bootstrap": "^3.20.4",
+    "@midwayjs/static-file": "^3.20.10",
     "@types/ali-oss": "^6.16.11",
     "ali-oss": "^6.23.0",
     "bcryptjs": "^3.0.2",

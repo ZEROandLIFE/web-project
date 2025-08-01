@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: '../backend/public', // 直接输出到后端public目录
+    outDir: '../back/public', // 直接输出到后端public目录
     emptyOutDir: true
   }
 })
