@@ -1,0 +1,11 @@
+name: Continuous Integration  # 工作流名称
+on: [push]                     # 触发条件：每次推送代码时触发
+
+jobs:
+  build-and-test:              # 任务名称
+    runs-on: ubuntu-latest      # 运行环境（Ubuntu 虚拟机）
+    steps:
+      - uses: actions/checkout@v4  # 拉取最新代码
+      - run: npm install           # 安装依赖（示例：Node.js 项目）
+      - run: npm test              # 运行测试
+      - run: npm run build          # 构建项目（可选）
