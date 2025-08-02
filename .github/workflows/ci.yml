@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest      # 运行环境（Ubuntu 虚拟机）
     steps:
       - uses: actions/checkout@v4  # 拉取最新代码
-      - working-directory: ../../back
+      - working-directory: ./back
         run: |
             npm install
             npm test
